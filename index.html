@@ -1,0 +1,1672 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="color-scheme" content="light dark" />
+<link rel="icon" href="data:," />
+<title>1945 日本海海上輸送ゲーム</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@600;800;900&family=Noto+Sans+JP:wght@400;500;700;900&family=Shippori+Mincho+B1:wght@700;800&display=swap" rel="stylesheet" />
+<style>
+button, [role="button"], select, summary, input:not([type="checkbox"], [type="radio"]) { min-height: 2.75rem;}
+* { box-sizing: border-box;}
+:root{
+--bg:#e9e2cf; --bg2:#ded2b4; --paper:#f4edd8; --paper2:#efe6cd;
+--ink:#1d2a33; --ink2:#43545f; --line:#b3a67f; --line2:#8f8262;
+--sea:#b9c9bd; --sea2:#a7bda9; --land:#d9c99b; --landline:#8a7a52;
+--accent:#8c2f22; --accent2:#a63d2a; --gold:#8a6d2f; --good:#2e5d3a; --bad:#8c2f22;
+--warn:#8a5a13; --chip:#efe6cd; --btn:#24333f; --btnink:#f0e8d2;
+--shadow:0 10px 28px rgba(46,38,18,.22);
+color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+:root{
+--bg:#0d161d; --bg2:#0a1218; --paper:#16222c; --paper2:#1a2833;
+--ink:#e6ddc4; --ink2:#a9b2ac; --line:#3d4c55; --line2:#55676f;
+--sea:#14303f; --sea2:#102936; --land:#2b3a3a; --landline:#5d6f66;
+--accent:#d96a4e; --accent2:#e07c5e; --gold:#c8a75a; --good:#7fb98c; --bad:#e07c6a;
+--warn:#d9a75a; --chip:#1c2b36; --btn:#c8b98a; --btnink:#16222c;
+--shadow:0 10px 28px rgba(0,0,0,.5);
+color-scheme: dark;
+}
+}
+html,body{margin:0;padding:0;}
+body{
+font-family:"Noto Sans JP",sans-serif; color:var(--ink);
+background:
+radial-gradient(1100px 500px at 85% -10%, rgba(140,109,47,.14), transparent 60%),
+linear-gradient(180deg,var(--bg),var(--bg2));
+min-height:100vh;
+}
+.app{max-width:1180px;margin:0 auto;padding:14px 14px 40px;}
+/* ---------- status header ---------- */
+.statusbar{
+display:flex;flex-wrap:wrap;gap:10px;align-items:stretch;justify-content:space-between;
+background:var(--paper);border:1.5px solid var(--line2);box-shadow:var(--shadow);
+padding:12px 16px;position:relative;overflow:hidden;
+}
+.statusbar::before{content:"";position:absolute;inset:0;border:1px solid var(--line);margin:4px;pointer-events:none;}
+.dateblock{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;}
+.dateblock>.era{font-family:"Shippori Mincho B1","Noto Serif JP",serif;font-weight:800;font-size:clamp(22px,4.5vw,32px);letter-spacing:.04em;}
+.dateblock>.sub{font-size:12.5px;color:var(--ink2);font-weight:700;letter-spacing:.12em;}
+.stamp{
+font-family:"Shippori Mincho B1",serif;font-weight:800;color:var(--accent);
+border:2px solid var(--accent);border-radius:4px;padding:2px 8px;font-size:13px;
+transform:rotate(-3deg);letter-spacing:.18em;white-space:nowrap;align-self:center;
+}
+.chips{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+.chip{background:var(--chip);border:1px solid var(--line2);padding:7px 12px;font-size:13px;font-weight:700;display:flex;gap:7px;align-items:baseline;}
+.chip b{font-size:17px;font-family:"Noto Serif JP",serif;}
+.chip>.u{font-size:11px;color:var(--ink2);font-weight:700;}
+.chip.danger b{color:var(--bad);}
+/* ---------- audio bar ---------- */
+.audiobar{margin-top:12px;background:var(--paper);border:1.5px solid var(--line2);box-shadow:var(--shadow);padding:10px 14px;display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;position:relative;}
+.audiobar::before{content:"";position:absolute;inset:0;border:1px solid var(--line);margin:4px;pointer-events:none;}
+.audiobar>*{position:relative;z-index:1;}
+.audio-title{font-family:"Shippori Mincho B1",serif;font-weight:800;letter-spacing:.12em;font-size:14px;display:flex;align-items:center;gap:8px;}
+.audio-title .note-ico{width:28px;height:28px;border-radius:50%;background:var(--accent);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:15px;flex:none;}
+.audio-title small{display:block;font-family:"Noto Sans JP",sans-serif;font-size:11px;letter-spacing:.02em;color:var(--ink2);font-weight:700;}
+.audio-btn{border:1.5px solid var(--line2);background:var(--paper2);color:var(--ink);font-weight:800;font-size:13px;padding:8px 12px;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:7px;}
+.audio-btn .dot-on{width:8px;height:8px;border-radius:50%;background:var(--good);flex:none;}
+.audio-btn.off{opacity:.65;}
+.audio-btn.off .dot-on{background:var(--bad);}
+.audio-btn[aria-pressed="true"]{border-color:var(--good);}
+.volwrap{display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:700;color:var(--ink2);}
+.volwrap input[type="range"]{width:130px;accent-color:var(--accent);min-height:auto;height:28px;}
+.nowplaying{font-size:12px;color:var(--ink2);margin-left:auto;font-weight:700;}
+.nowplaying b{color:var(--accent);}
+@media(max-width:640px){.nowplaying{margin-left:0;width:100%;}.volwrap input[type="range"]{width:110px;}}
+/* ---------- quota ---------- */
+.quota{margin-top:12px;background:var(--paper);border:1.5px solid var(--line2);box-shadow:var(--shadow);padding:12px 16px 14px;position:relative;}
+.quota::before{content:"";position:absolute;inset:0;border:1px solid var(--line);margin:4px;pointer-events:none;}
+.quota-head{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:baseline;position:relative;z-index:1;}
+.quota-head>.t{font-weight:900;font-size:15px;letter-spacing:.06em;}
+.t>.res{color:var(--accent);}
+.quota-head>.nums{font-family:"Noto Serif JP",serif;font-weight:800;font-size:15px;}
+.nums>small{color:var(--ink2);font-family:"Noto Sans JP",sans-serif;font-weight:700;font-size:12px;}
+.bar{height:16px;background:var(--paper2);border:1px solid var(--line2);margin-top:9px;position:relative;z-index:1;overflow:hidden;}
+.bar > i{display:block;height:100%;width:0%;background:repeating-linear-gradient(45deg,var(--good) 0 10px, color-mix(in srgb, var(--good) 78%, #000) 10px 20px);transition:width.6s ease;}
+.bar.over > i{background:repeating-linear-gradient(45deg,var(--gold) 0 10px, color-mix(in srgb, var(--gold) 78%, #000) 10px 20px);}
+.quota-note{font-size:12.5px;color:var(--ink2);margin-top:8px;position:relative;z-index:1;line-height:1.6;}
+.monthtrack{display:flex;gap:5px;margin-top:10px;position:relative;z-index:1;flex-wrap:wrap;}
+.mt{flex:1;min-width:62px;text-align:center;font-size:11px;font-weight:700;padding:5px 2px;border:1px solid var(--line2);background:var(--paper2);color:var(--ink2);line-height:1.45;}
+.mt>.mq{display:block;font-size:10px;font-weight:700;opacity:.85;font-family:"Noto Serif JP",serif;}
+.mt.now{outline:2px solid var(--accent);color:var(--ink);}
+.mt.ok{background:var(--good);color:#fff;border-color:var(--good);}
+.mt.ng{background:var(--bad);color:#fff;border-color:var(--bad);}
+@media (prefers-color-scheme: dark){.mt.ok{color:#0d161d;}.mt.ng{color:#0d161d;}}
+/* ---------- layout ---------- */
+.layout{display:grid;grid-template-columns:1.55fr 1fr;gap:12px;margin-top:12px;align-items:start;}
+@media (max-width:880px){.layout{grid-template-columns:1fr;}}
+.card{background:var(--paper);border:1.5px solid var(--line2);box-shadow:var(--shadow);position:relative;}
+.card::before{content:"";position:absolute;inset:0;border:1px solid var(--line);margin:4px;pointer-events:none;z-index:3;}
+.card-h{padding:11px 16px 0;display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap;}
+.card-h h2{font-family:"Shippori Mincho B1","Noto Serif JP",serif;font-size:17px;margin:0;letter-spacing:.08em;font-weight:800;}
+.card-h>.tag{font-size:11.5px;color:var(--ink2);font-weight:700;letter-spacing:.1em;}
+.mapwrap{padding:8px 12px 12px;}
+svg.map{width:100%;height:auto;display:block;background:linear-gradient(180deg,var(--sea),var(--sea2));border:1px solid var(--line2);}
+.voyage-status{min-height:30px;padding:0 16px 12px;font-size:13.5px;font-weight:700;display:flex;align-items:center;gap:8px;}
+.voyage-status>.dot{width:9px;height:9px;border-radius:50%;background:var(--good);flex:none;}
+.voyage-status.sailing>.dot{background:var(--warn);animation:blink 1s infinite;}
+@keyframes blink{50%{opacity:.25;}}
+/* ---------- planning panel ---------- */
+.panel{padding:14px 16px 16px;}
+.panel h2{font-family:"Shippori Mincho B1","Noto Serif JP",serif;font-size:17px;margin:0 0 4px;letter-spacing:.08em;}
+.intel{font-size:12.5px;line-height:1.65;color:var(--ink2);background:var(--paper2);border:1px dashed var(--line2);padding:8px 10px;margin:8px 0 4px;}
+.intel b{color:var(--accent);}
+.group{margin-top:14px;}
+.group >.glabel{font-size:12px;font-weight:900;letter-spacing:.16em;color:var(--ink2);margin-bottom:7px;display:flex;justify-content:space-between;}
+.opts{display:grid;gap:7px;}
+.opts.c3{grid-template-columns:1fr;}
+.opts.c2{grid-template-columns:1fr 1fr;}
+.opt{
+text-align:left;background:var(--paper2);border:1.5px solid var(--line2);color:var(--ink);
+padding:9px 12px;cursor:pointer;font-family:inherit;width:100%;
+}
+.opt>.on{font-weight:900;font-size:14.5px;display:block;}
+.opt>.od{font-size:11.8px;color:var(--ink2);line-height:1.55;display:block;margin-top:2px;}
+.opt.sel{border-color:var(--accent);background:color-mix(in srgb, var(--accent) 10%, var(--paper2));box-shadow:inset 0 0 0 1px var(--accent);}
+.opt:disabled{opacity:.42;cursor:not-allowed;}
+.od>b{color:var(--ink);}
+/* forecast */
+.forecast{margin-top:16px;border-top:1.5px solid var(--line2);padding-top:12px;}
+.forecast>.glabel{font-size:12px;font-weight:900;letter-spacing:.16em;color:var(--ink2);margin-bottom:8px;}
+.frow{display:grid;grid-template-columns:96px 1fr 52px;gap:8px;align-items:center;font-size:12.5px;font-weight:700;margin-top:6px;}
+.fbar{height:10px;background:var(--paper2);border:1px solid var(--line2);}
+.fbar > i{display:block;height:100%;width:0%;transition:width.35s ease;}
+.fbar.risk > i{background:var(--bad);}
+.fbar.safe > i{background:var(--good);}
+.fnums{display:flex;gap:8px;flex-wrap:wrap;margin-top:11px;}
+.fnum{flex:1;min-width:100px;background:var(--paper2);border:1px solid var(--line2);padding:7px 10px;}
+.fnum>.k{font-size:11px;color:var(--ink2);font-weight:700;}
+.fnum>.v{font-family:"Noto Serif JP",serif;font-weight:800;font-size:17px;}
+.v>small{font-size:11px;font-family:"Noto Sans JP",sans-serif;color:var(--ink2);}
+.actions{margin-top:16px;display:grid;gap:8px;}
+.depart{
+background:var(--accent);color:#fff;border:none;font-family:"Shippori Mincho B1",serif;font-weight:800;
+font-size:19px;letter-spacing:.22em;padding:13px;cursor:pointer;box-shadow:0 4px 0 color-mix(in srgb, var(--accent) 60%, #000);
+}
+.depart:active{transform:translateY(3px);box-shadow:0 1px 0 color-mix(in srgb, var(--accent) 60%, #000);}
+.depart:disabled{opacity:.45;cursor:not-allowed;transform:none;}
+.endmonth{background:transparent;color:var(--ink);border:1.5px solid var(--line2);font-weight:700;font-size:14px;cursor:pointer;font-family:inherit;padding:9px;}
+.endmonth:disabled{opacity:.4;cursor:not-allowed;}
+/* ---------- log ---------- */
+.log-card{margin-top:12px;}
+.log{padding:10px 16px 16px;max-height:340px;overflow-y:auto;font-size:13.5px;line-height:1.75;}
+.log>.e{border-bottom:1px dotted var(--line);padding:5px 0;display:flex;gap:10px;}
+.e>.d{flex:none;font-weight:900;color:var(--ink2);font-size:12px;padding-top:2px;min-width:74px;}
+.e.bad>.m{color:var(--bad);font-weight:700;}
+.e.good>.m{color:var(--good);font-weight:700;}
+.e.sys>.m{color:var(--ink2);}
+.e.head>.m{font-weight:900;}
+/* ---------- overlays ---------- */
+.overlay{position:fixed;inset:0;background:rgba(10,14,16,.66);display:none;align-items:center;justify-content:center;padding:16px;z-index:50;}
+.overlay.show{display:flex;}
+.sheet{background:var(--paper);color:var(--ink);border:2px solid var(--line2);max-width:620px;width:100%;max-height:88vh;overflow-y:auto;padding:26px 26px 22px;box-shadow:var(--shadow);position:relative;}
+.sheet::before{content:"";position:absolute;inset:0;border:1px solid var(--line);margin:5px;pointer-events:none;}
+.sheet h2{font-family:"Shippori Mincho B1","Noto Serif JP",serif;font-size:clamp(21px,5vw,28px);margin:0 0 6px;letter-spacing:.05em;line-height:1.35;}
+.sheet>.kicker{font-size:12px;font-weight:900;letter-spacing:.22em;color:var(--accent);}
+.sheet p{font-size:14px;line-height:1.9;}
+.sheet ul{font-size:13.5px;line-height:1.85;padding-left:20px;}
+.bigbtn{background:var(--btn);color:var(--btnink);border:none;width:100%;font-family:"Shippori Mincho B1",serif;font-weight:800;font-size:17px;letter-spacing:.16em;padding:13px;cursor:pointer;margin-top:14px;position:relative;z-index:1;}
+.sumtable{width:100%;border-collapse:collapse;font-size:14px;margin:12px 0;}
+.sumtable td{padding:7px 4px;border-bottom:1px dotted var(--line2);}
+.sumtable td:last-child{text-align:right;font-family:"Noto Serif JP",serif;font-weight:800;}
+.verdict{font-family:"Shippori Mincho B1",serif;font-weight:800;font-size:19px;text-align:center;border:2px solid var(--accent);color:var(--accent);padding:10px;transform:rotate(-1.2deg);margin:14px 0;letter-spacing:.1em;}
+.rank{font-family:"Shippori Mincho B1",serif;font-size:74px;font-weight:900;text-align:center;color:var(--accent);line-height:1;margin:8px 0 0;}
+.end-big{font-family:"Shippori Mincho B1",serif;font-weight:900;text-align:center;line-height:1.15;margin:10px 0 4px;letter-spacing:.14em;}
+.end-big.gameover{font-size:clamp(30px,7vw,44px);color:var(--bad);}
+.end-big.clear{font-size:clamp(26px,6vw,38px);color:var(--good);}
+.end-sub{text-align:center;font-weight:900;font-size:14px;letter-spacing:.18em;color:var(--ink2);margin:0 0 6px;}
+.sheet.gameover-sheet{border-color:var(--bad);}
+.sheet.clear-sheet{border-color:var(--good);}
+.fleetlist{font-size:12.5px;color:var(--ink2);line-height:1.8;}
+.chip.warn b{color:var(--warn);}
+.chip.invincible{background:var(--accent);color:#fff;border-color:var(--accent);letter-spacing:.06em;animation:invPulse 1.6s ease-in-out infinite;}
+.chip.invincible b{color:#ffe9a8;font-size:14px;}
+@keyframes invPulse{0%,100%{box-shadow:0 0 0 0 rgba(140,47,34,.0);}50%{box-shadow:0 0 0 5px rgba(140,47,34,.18);}}
+@media (prefers-color-scheme: dark){.chip.invincible b{color:#ffe9a8;}}
+.sheet.cheat-sheet{border-color:var(--gold);text-align:center;}
+.sheet.cheat-sheet .kicker{color:var(--gold);}
+.cheat-code{font-family:"Noto Serif JP",serif;font-weight:900;font-size:clamp(20px,5vw,30px);letter-spacing:.14em;margin:10px 0 4px;color:var(--accent);}
+.cheat-stars{font-size:22px;color:var(--gold);letter-spacing:.4em;margin:2px 0 0;}
+.sheet.breakdown-sheet{border-color:var(--warn);}
+.sheet.breakdown-sheet .kicker{color:var(--warn);}
+.breaklist{font-size:14px;line-height:1.9;padding-left:20px;margin:8px 0;}
+.breaklist li{font-weight:700;}
+.break-avail{background:var(--paper2);border:1px dashed var(--line2);padding:10px 12px;font-size:13.5px;line-height:1.8;}
+.hidden{display:none!important;}
+.note{font-size:12px;color:var(--ink2);line-height:1.7;}
+</style>
+</head>
+<body>
+<div class="app">
+<!-- ======= status ======= -->
+<div class="statusbar">
+<div class="dateblock">
+<div>
+<div class="era" id="dateLabel">1945年 1月</div>
+<div class="sub">新潟 ― 釜山 海上輸送司令部</div>
+</div>
+<div class="stamp">極秘・輸送計画</div>
+</div>
+<div class="chips">
+<div class="chip">残り日数 <b id="daysLeft">31</b><span class="u">日</span></div>
+<div class="chip">保有輸送船 <b id="fleetCount">16</b><span class="u">隻</span></div>
+<div class="chip warn">故障・修理中 <b id="brokenCount">0</b><span class="u">隻</span></div>
+<div class="chip" id="fuelChip">備蓄燃料 <b id="fuelStock">900</b><span class="u">トン</span></div>
+<div class="chip">累計輸送 <b id="totalDelivered">0</b><span class="u">トン</span></div>
+<div class="chip danger">累計喪失 <b id="totalLost">0</b><span class="u">隻</span></div>
+<div class="chip">船員救助 <b id="crewRescued">0</b><span class="u">名</span></div>
+<div class="chip danger">船員喪失 <b id="crewLost">0</b><span class="u">名</span></div>
+<div class="chip invincible hidden" id="invincibleChip" role="status">★ 万歳モード <b>発動中</b><span class="u" style="color:#ffe9a8;">沈没なし・燃料消費なし</span></div>
+</div>
+</div>
+
+<!-- ======= audio ======= -->
+<div class="audiobar" aria-label="音楽と効果音の設定">
+<div class="audio-title"><span class="note-ico" aria-hidden="true">♪</span><span>軍楽・音響<small>通常BGMは「月月火水木金金」／★万歳モード中は「軍艦行進曲」／汽笛・爆発などの効果音</small></span></div>
+<button class="audio-btn" id="bgmToggle" type="button" aria-pressed="true"><span class="dot-on"></span><span id="bgmToggleLabel">BGM オン ― 月月火水木金金</span></button>
+<button class="audio-btn" id="sfxToggle" type="button" aria-pressed="true"><span class="dot-on"></span><span id="sfxToggleLabel">効果音 オン</span></button>
+<label class="volwrap">音量 <input type="range" id="volSlider" min="0" max="100" value="72" aria-label="全体の音量" /> <span id="volVal">72%</span></label>
+<div class="nowplaying" id="nowPlaying">演奏中： <b>「月月火水木金金」</b> ― 高橋俊策 作詞／江口夜詩 作曲・海軍軍歌（自動ループ）</div>
+</div>
+
+<!-- ======= quota ======= -->
+<div class="quota">
+<div class="quota-head">
+<div class="t">今月の輸送ノルマ ― <span class="res">希少資源（米・石炭・鉄鉱石・塩）</span>を日本へ</div>
+<div class="nums"><span id="monthDelivered">0</span> <small>/</small> <span id="monthQuota">5,000</span> <small>トン</small></div>
+</div>
+<div class="bar" id="quotaBar"><i></i></div>
+<div class="quota-note" id="quotaNote">輸送船1隻の積載量は1,000トン。到着した船の数だけ資源が届く。ノルマ未達の月が続けば、本土の工場と食卓は止まっていく。</div>
+<div class="monthtrack" id="monthTrack"></div>
+</div>
+
+<div class="layout">
+<!-- ======= map ======= -->
+<section class="card">
+<div class="card-h"><h2>日本海 航路略図</h2><span class="tag" id="mapTag">新潟 ⇄ 釜山</span></div>
+<div class="mapwrap">
+<svg class="map" id="mapSvg" viewBox="0 0 640 470" role="img" aria-label="新潟と釜山を結ぶ日本海の航路図">
+<!-- graticule: 緯線 北緯35°/40°、経線 東経130°/135°/140°（実座標投影） -->
+<g stroke="var(--landline)" stroke-width="0.5" opacity="0.35">
+<line x1="0" y1="187" x2="640" y2="187"/><line x1="0" y1="367" x2="640" y2="367"/>
+<line x1="149" y1="0" x2="149" y2="470"/><line x1="319" y1="0" x2="319" y2="470"/>
+<line x1="489" y1="0" x2="489" y2="470"/>
+</g>
+<g font-size="9" font-weight="700" fill="var(--ink2)" opacity="0.85">
+<text x="5" y="183">北緯40°</text><text x="5" y="363">北緯35°</text>
+<text x="149" y="464" text-anchor="middle">東経130°</text>
+<text x="319" y="464" text-anchor="middle">東経135°</text>
+<text x="489" y="464" text-anchor="middle">東経140°</text>
+</g>
+<!-- 大陸・朝鮮半島（釜山は半島南東端） -->
+<path d="M0,0 L414,0 L319,22 L248,67 L213,75 L228,84 L205,90 L183,90 L171,103 L146,133 L139,155 L129,193 L101,227 L88,248 L101,270 L127,301 L126,347 L118,361 L101,365 L61,376 L25,374 L27,364 L32,331 L37,279 L25,259 L0,235 Z"
+fill="var(--land)" stroke="var(--landline)" stroke-width="1.5"/>
+<!-- 本州（日本海側海岸線：下関―敦賀―能登―新潟―秋田―津軽） -->
+<path d="M181,403 L207,396 L241,382 L261,350 L293,348 L345,346 L356,333 L360,324 L382,284 L398,277 L389,293 L394,303 L452,266 L456,262 L467,239 L483,226 L490,197 L492,176 L501,151 L496,140 L540,120 L640,170 L640,470 L300,470 L225,445 Z"
+fill="var(--land)" stroke="var(--landline)" stroke-width="1.5"/>
+<!-- 北海道（南岸・渡島半島） -->
+<path d="M465,95 L480,58 L500,0 L640,0 L640,80 L610,95 L580,100 L545,95 L514,123 L501,117 L484,119 Z" fill="var(--land)" stroke="var(--landline)" stroke-width="1.5"/>
+<!-- 九州北岸 -->
+<path d="M118,470 L138,436 L163,418 L178,408 L196,424 L202,470 Z" fill="var(--land)" stroke="var(--landline)" stroke-width="1.5"/>
+<!-- 佐渡島（新潟の西方沖）・隠岐・対馬・鬱陵島 -->
+<ellipse cx="433" cy="258" rx="16" ry="6" transform="rotate(-38 433 258)" fill="var(--land)" stroke="var(--landline)"/>
+<ellipse cx="257" cy="324" rx="10" ry="5" fill="var(--land)" stroke="var(--landline)"/>
+<ellipse cx="125" cy="388" rx="6" ry="11" transform="rotate(22 125 388)" fill="var(--land)" stroke="var(--landline)"/>
+<ellipse cx="180" cy="277" rx="6" ry="4" fill="var(--land)" stroke="var(--landline)"/>
+<!-- sub patrol zones -->
+<g fill="none" stroke="var(--bad)" stroke-width="1.2" stroke-dasharray="5 4" opacity="0.75">
+<ellipse cx="310" cy="225" rx="64" ry="28"/>
+<ellipse cx="185" cy="322" rx="44" ry="19"/>
+</g>
+<text x="310" y="190" text-anchor="middle" font-size="11" font-weight="700" fill="var(--bad)">敵潜水艦 哨戒海域</text>
+<text x="185" y="326" text-anchor="middle" font-size="10.5" font-weight="700" fill="var(--bad)">敵潜水艦 哨戒海域</text>
+<!-- minefields -->
+<g stroke="var(--warn)" stroke-width="1.6" id="mineGroup"></g>
+<text x="60" y="440" text-anchor="middle" font-size="11" font-weight="700" fill="var(--warn)">× B-29敷設 機雷原</text>
+<!-- routes: 釜山(118,361) → 新潟(456,262) -->
+<path id="route-detour" d="M118,361 C165,265 215,175 295,142 C365,113 425,175 456,262" fill="none" stroke="var(--ink2)" stroke-width="2" stroke-dasharray="7 6" opacity="0.55"/>
+<path id="route-standard" d="M118,361 C185,308 245,252 320,233 C375,220 425,232 456,262" fill="none" stroke="var(--ink2)" stroke-width="2" stroke-dasharray="7 6" opacity="0.55"/>
+<path id="route-direct" d="M118,361 C200,338 320,300 456,262" fill="none" stroke="var(--ink2)" stroke-width="2" stroke-dasharray="7 6" opacity="0.55"/>
+<!-- ports -->
+<g font-family="Noto Sans JP" font-weight="900">
+<circle cx="118" cy="361" r="6" fill="var(--accent)" stroke="var(--paper)" stroke-width="2"/>
+<text x="134" y="352" font-size="16" fill="var(--ink)">釜山</text>
+<text x="134" y="336" font-size="10.5" font-weight="700" fill="var(--ink2)">資源積出港</text>
+<circle cx="456" cy="262" r="6" fill="var(--accent)" stroke="var(--paper)" stroke-width="2"/>
+<text x="472" y="270" font-size="16" fill="var(--ink)">新潟</text>
+<text x="472" y="254" font-size="10.5" font-weight="700" fill="var(--ink2)">資源揚陸港</text>
+</g>
+<!-- reference ports & place labels -->
+<g font-size="9.5" font-weight="700" fill="var(--ink2)">
+<circle cx="490" cy="197" r="3" fill="var(--ink2)"/><text x="497" y="201">秋田</text>
+<circle cx="356" cy="344" r="3" fill="var(--ink2)"/><text x="362" y="358">敦賀</text>
+<text x="410" y="244" text-anchor="middle">佐渡島</text>
+<text x="180" y="264" text-anchor="middle">鬱陵島</text>
+<text x="141" y="392">対馬</text>
+<text x="216" y="98" text-anchor="middle">ウラジオストク</text>
+<text x="568" y="42" text-anchor="middle" font-size="11">北海道</text>
+</g>
+<text x="58" y="235" font-size="13" font-weight="700" fill="var(--ink2)" transform="rotate(-82 58 235)">朝鮮半島</text>
+<text x="548" y="318" font-size="13" font-weight="700" fill="var(--ink2)" transform="rotate(38 548 318)">本州</text>
+<text x="295" y="338" text-anchor="middle" font-size="15" font-weight="900" letter-spacing="8" fill="var(--ink2)" opacity="0.8">日 本 海</text>
+<g id="fxLayer"></g>
+<g id="convoyLayer"></g>
+</svg>
+</div>
+<div class="voyage-status" id="voyageStatus"><span class="dot"></span><span id="voyageStatusText">港で出航命令を待っている。</span></div>
+</section>
+
+<!-- ======= planning ======= -->
+<section class="card panel">
+<h2>輸送計画の立案</h2>
+<div class="intel" id="intelBox"></div>
+
+<div class="group">
+<div class="glabel"><span>一．航路</span><span id="routeDaysHint"></span></div>
+<div class="opts c3" id="routeOpts">
+<button class="opt" data-route="direct">
+<span class="on">最短航路 ― 日本海直行</span>
+<span class="od">最速で駆け抜ける。敵に<b>見つかりやすい</b>が、発見されても<b>逃げ切れる公算が大きい</b>。機雷原の濃い海域を通る。<b>高速航行のため燃料消費は大 ― 1隻あたり42トン</b>（標準航路より4割増し）。</span>
+</button>
+<button class="opt" data-route="standard">
+<span class="on">標準航路 ― 日本海横断</span>
+<span class="od">距離・危険ともに中庸。隠岐諸島の北を抜ける慣れた航路。<b>燃料消費は標準 ― 1隻あたり30トン</b>。燃料計画の基準になる航路。</span>
+</button>
+<button class="opt" data-route="detour">
+<span class="on">遠回り航路 ― 北方迂回</span>
+<span class="od">敵の目から<b>見つかりにくい</b>。だが航行が長く、そのぶん<b>捕捉される機会と触雷の機会が増える</b>。逃走も不利。<b>距離が伸びるため燃料消費も増える ― 1隻あたり39トン</b>。沖合を進むため、沈没時の乗員救助も難しくなる。</span>
+</button>
+</div>
+</div>
+
+<div class="group">
+<div class="glabel"><span>二．船団の規模</span><span id="fleetHint"></span></div>
+<div class="opts c3" id="fleetOpts">
+<button class="opt" data-fleet="1">
+<span class="on">単独航行 ― 1隻（極少数精鋭）</span>
+<span class="od">最も目立たず<b>発見されにくい</b>。発見されても単独の船は狙いを絞りにくく、<b>撃滅される可能性も最も低い</b>。ただし運べるのは1,000トンだけ。沈めばその航海は全滅になる、背水の編成。<b>残存船が1隻でも出航できる。</b></span>
+</button>
+<button class="opt" data-fleet="2">
+<span class="on">少数精鋭 ― 2隻</span>
+<span class="od">目立たず<b>発見されにくい</b>。発見されても小さな船団は狙いにくく、<b>撃滅される可能性も低い</b>。運べる量は2,000トンまでと小さいが、<b>残存船が2隻以下になっても出航できる</b>最後の精鋭編成。</span>
+</button>
+<button class="opt" data-fleet="3">
+<span class="on">小型船団 ― 3隻</span>
+<span class="od">目立たず<b>発見されにくい</b>。発見されても小さな船団は狙いにくく、<b>撃滅される可能性も低い</b>。ただし一度に運べる量が小さいのが弱点。</span>
+</button>
+<button class="opt" data-fleet="5">
+<span class="on">標準船団 ― 5隻</span>
+<span class="od">ノルマ達成の主力となる編成。ただし中途半端な規模ゆえ、発見されれば損害の割合は大きくなりやすい。</span>
+</button>
+<button class="opt" data-fleet="8">
+<span class="on">大船団 ― 8隻</span>
+<span class="od">大規模ゆえ<b>発見されやすい</b>。だが攻撃を受けても的が分散し、<b>生き残る船の割合は高い</b>。一度に大量輸送できる。</span>
+</button>
+</div>
+</div>
+
+<div class="group">
+<div class="glabel"><span>三．運航時間帯</span></div>
+<div class="opts c2" id="timeOpts">
+<button class="opt" data-time="day">
+<span class="on">昼間運航</span>
+<span class="od">全速で走れるため<b>航行は短い</b>。だが姿がよく見え、<b>発見率は高い</b>。逃走には有利。</span>
+</button>
+<button class="opt" data-time="night">
+<span class="on">夜間運航</span>
+<span class="od">闇に紛れて<b>発見率は低い</b>。だが灯火管制と減速で<b>航行は長く</b>、逃走も鈍る。</span>
+</button>
+</div>
+</div>
+
+<div class="forecast">
+<div class="glabel">参謀本部 見通し</div>
+<div class="frow"><span>触雷率（1隻）</span><div class="fbar risk"><i id="fbMine"></i></div><span id="fvMine">–</span></div>
+<div class="frow"><span>敵に発見される率</span><div class="fbar risk"><i id="fbDetect"></i></div><span id="fvDetect">–</span></div>
+<div class="frow"><span>発見時の逃走率</span><div class="fbar safe"><i id="fbEscape"></i></div><span id="fvEscape">–</span></div>
+<div class="frow"><span>損耗率（1隻）</span><div class="fbar risk"><i id="fbLoss"></i></div><span id="fvLoss">–</span></div>
+<div class="frow"><span>故障率（今月・1隻）</span><div class="fbar risk"><i id="fbBreak"></i></div><span id="fvBreak">–</span></div>
+<div class="fnums">
+<div class="fnum"><div class="k">航行日数（往復）</div><div class="v" id="fvDays">–</div></div>
+<div class="fnum"><div class="k">到着見込み</div><div class="v" id="fvArrive">–</div></div>
+<div class="fnum"><div class="k">輸送見込み</div><div class="v" id="fvCargo">–</div></div>
+<div class="fnum"><div class="k">燃料消費（今回の出航）</div><div class="v" id="fvFuel">–</div></div>
+<div class="fnum"><div class="k">沈没時の乗員救助率（目安）</div><div class="v" id="fvRescue">–</div></div>
+<div class="fnum"><div class="k">出航可能な船</div><div class="v" id="fvAvail">–</div></div>
+</div>
+<p class="note" style="margin-top:9px;">燃料は<b>備蓄燃料</b>から消費する。最短航路は高速航行で、遠回り航路は距離の分だけ、どちらも標準航路より燃料を食う。備蓄が足りなければ出航できない。沈没した船の乗員（1隻28名）は、条件に応じた割合で救助できる――昼間は救助しやすく、夜間と沖合の遠回り航路では難しくなる。</p>
+</div>
+
+<div class="actions">
+<button class="depart" id="departBtn">出 航 命 令</button>
+<button class="endmonth" id="endMonthBtn">今月の輸送を終了する（残り日数を送る）</button>
+</div>
+<p class="note" style="margin-top:10px;">船は帰港すれば次の船団に再び編入できる。沈んだ船は戻らない。月が替われば徴用船が数隻補充されるが、失う速度の方が速い。<b>残存船が2隻以下でも、少数精鋭（2隻）や単独航行（1隻）で出航できる。</b>選択中の編成が出航可能な船数を上回った場合は、送れる最大の編成に自動で切り替わる。<b>故障した船は修理が終わる翌月まで出港できない</b>――故障が発生したらポップアップで知らせる。燃料配給は月ごとに届くが、終盤ほど細る。大船団を何度も出す前に、備蓄燃料の残りを必ず確認すること。</p>
+</section>
+</div>
+
+<!-- ======= log ======= -->
+<section class="card log-card">
+<div class="card-h"><h2>戦況日誌</h2><span class="tag">輸送司令部 記録</span></div>
+<div class="log" id="logBox"></div>
+</section>
+
+<!-- ======= sources ======= -->
+<section class="card" style="margin-top:12px;">
+<div class="card-h"><h2>損耗率とノルマの根拠 ― 史料ノート</h2><span class="tag">バランス調整の出典</span></div>
+<div style="padding:10px 16px 16px;font-size:13px;line-height:1.85;">
+<p style="margin:0 0 8px;">このゲームの月別損耗率・ノルマ・補充数は、コラム「<a href="https://w.atwiki.jp/works_petrowka/pages/61.html" target="_blank" rel="noopener">船舶の建造と損耗で見る太平洋戦争</a>」（works_petrowka／原資料『貧国強兵』『海上護衛戦』）の商船・タンカー収支をもとに調整した。</p>
+<ul style="margin:0;padding-left:20px;">
+<li><b>1945年（1〜8月）の収支</b> ― 商船の損耗 1,175,810トン＋タンカー 361,674トン＝<b>約154万トン</b>の喪失に対し、建造は商船 473,912トン＋タンカー 85,651トン＝<b>約56万トン</b>。損耗は建造の約2.7倍で、差し引き約97万トンの純減。→ ゲームでは補充が月3隻→2隻→1隻へ細り、失う速度に追いつかない。</li>
+<li><b>商船隊の縮小</b> ― 開戦時 2,529隻・633.7万総トンが、終戦時 2,018隻・<b>220.7万総トン（35%）</b>に。隻数より総トン数が激減したのは、大型の優秀船から沈んでいったため。→ ゲームでも終盤ほど大船団の出血が重くなる。</li>
+<li><b>損耗の加速</b> ― 年間の商船＋タンカー損耗は第1年 約103万トン → 第3年（1944年）約390万トンと膨れ上がった。1945年は船自体が減って絶対量こそ落ちるが、残った船1隻あたりの危険は増す一方だった。3月27日開始のB-29機雷封鎖「飢餓作戦」と、6月の米潜水艦の日本海侵入（バーニー作戦）が転機。→ ゲームの触雷率は3月に、発見率は6月に一段跳ね上がり、標準運航の損耗率は1月 約11% → 8月 約40%へ悪化する。</li>
+<li><b>燃料・船員・故障（ゲーム上の設定）</b> ― 備蓄燃料の消費量（標準30／最短42／遠回り39トン・1隻あたり）、乗員28名と救助率、故障率（1月5%→8月22%）は、戦争末期の燃料逼迫・老朽船の増加という状況を遊びに落とし込むための本ゲーム独自の設定であり、特定の史料の数値ではない。方向性――末期ほど燃料は細り、船は壊れやすくなる――は当時の輸送戦の実情に沿わせた。</li>
+<li><b>ノルマの考え方</b> ― 史実では届く量が減る一方でも本土の需要は増え続けた。その綱引きを再現するため、ノルマ総量は 5,000 → 11,000トンへ段階的に引き上げつつ、損耗の悪化に合わせて旧設定（合計68,000トン）から合計61,000トンへ抑えた。量の伸び以上に「1隻あたりの実入り」が減る分、実質の厳しさは終盤ほど重くなる。</li>
+</ul>
+</div>
+</section>
+</div>
+
+<!-- ======= intro overlay ======= -->
+<div class="overlay show" id="introOverlay">
+<div class="sheet">
+<div class="kicker">1945年1月 ― 日本海</div>
+<h2>新潟―釜山 海上輸送<br />その命綱を、君に託す</h2>
+<p>戦争は末期に入った。本土の工場と食卓は、朝鮮半島から運ばれる米・石炭・鉄鉱石・塩に命を繋がれている。だが日本海は、もはや安全な内海ではない。B-29が投下した機雷原は拡大を続け、敵潜水艦は航路をうかがっている。</p>
+<p>君は新潟―釜山間の輸送司令官として、<b>1945年1月から8月まで、毎月の輸送ノルマ</b>を果たさなければならない。</p>
+<ul>
+<li><b>航路</b> ― 最短は見つかりやすいが逃げ切れる。遠回りは見つかりにくいが、長い航行が捕捉と触雷の機会を増やす。</li>
+<li><b>船の数</b> ― 大船団は目立つが生き残る割合が高い。少数船団は発見されにくく、見つかっても撃滅されにくいが、運べる量は小さい。<b>残存船が2隻以下になっても、1〜2隻の少数精鋭船団で出航できる</b>――船が尽きるその時まで、輸送は止まらない。</li>
+<li><b>時間帯</b> ― 昼は速いが見つかりやすい。夜は隠れられるが遅い。</li>
+<li>船1隻＝資源1,000トン。沈んだ船と積荷は、二度と戻らない。</li>
+<li><b>ノルマは段階ごとに厳しくなる</b> ― 1月 5,000トンから始まり、2月 5,500 → 3月 7,000 → 4月 8,000 → 5月 9,000 → 6月 10,000 → 7月 11,000トンと上がり続ける。8月は15日間で 5,500トン。合計 61,000トン。</li>
+<li><b>損耗率は史料をもとに調整した</b> ― 1945年の日本は8か月で商船・タンカー約154万トンを失い、建造は約56万トン止まりだった。3月末の機雷封鎖「飢餓作戦」と6月の米潜水艦の日本海侵入を境に危険は跳ね上がり、標準的な運航での1隻あたり損耗率は1月の約1割から、8月には約4割へ悪化していく。補充も月3隻から月1隻へ細る。</li>
+<li><b>燃料</b> ― 出航のたびに<b>備蓄燃料</b>を消費する（1隻あたり 標準航路30トン／最短航路42トン／遠回り航路39トン）。最短航路は高速航行のため、遠回り航路は距離が伸びるため、どちらも標準より燃料を食う。配給は月ごとに届くが終盤ほど細り、<b>備蓄が足りなければ出航できない</b>。</li>
+<li><b>船員</b> ― 輸送船1隻の乗員は28名。船が沈んでも乗員全員が失われるわけではなく、<b>一定の割合を救助できる</b>。救助率は月を追うごとに下がり、昼間は上がり、夜間と沖合の遠回り航路では下がる。救助できた船員と失った船員は、上部のチップと月次報告に記録される。</li>
+<li><b>故障</b> ― 老朽化と部品不足で、船は一定の割合で機関故障を起こす。<b>故障率は1月の5%から8月の22%へ、戦争末期に連れて増えていく</b>。故障した船は<b>出港できず</b>、発生した時点で<b>ポップアップで通知</b>する。修理は翌月までかかる。</li>
+<li><b>結末は2つある</b> ― 保有輸送船が<b>0隻</b>になれば、その時点で<b>ゲームオーバー（輸送網崩壊）</b>となる。逆に<b>1月から8月まで8か月すべてでノルマを達成し続ければ、完全達成</b>として終戦を迎えられる。</li>
+</ul>
+<p>8月、戦争は終わる。その日まで、何隻を、何トンを、本土へ届けられるか。</p>
+<p style="background:var(--paper2);border:1px dashed var(--line2);padding:10px 12px;"><b>♪ 音響について</b> ― 着任と同時に、海軍軍歌<b>「月月火水木金金」</b>（艦隊勤務／高橋俊策 作詞・江口夜詩 作曲）がBGMとして流れ始めます。土日返上の艦隊勤務を歌った、海の男の行進曲です。出航時は汽笛、触雷・被雷時は爆発音、敵潜発見時は警報とソナー、帰港時は到着の汽笛と鐘が鳴ります。音量とオン／オフは画面上部の「軍楽・音響」バーでいつでも切り替えられます。※ブラウザの仕様上、音はこのボタンを押した後に始まります。また、裏コマンドで<b>万歳モード</b>を発動している間は、BGMが海軍の公式行進曲<b>「軍艦行進曲」</b>（瀬戸口藤吉）に切り替わります。解除すれば「月月火水木金金」に戻ります。</p>
+<button class="bigbtn" id="startBtn">司令部に着任する ― BGM開始</button>
+</div>
+</div>
+
+<!-- ======= month summary overlay ======= -->
+<div class="overlay" id="monthOverlay">
+<div class="sheet">
+<div class="kicker" id="sumKicker">月次報告</div>
+<h2 id="sumTitle">1月 終了</h2>
+<div class="verdict" id="sumVerdict">ノルマ達成</div>
+<table class="sumtable">
+<tr><td>今月の輸送量</td><td id="sumDelivered">0 トン</td></tr>
+<tr><td>今月のノルマ</td><td id="sumQuota">0 トン</td></tr>
+<tr><td>今月の喪失船</td><td id="sumLost">0 隻</td></tr>
+<tr><td>今月の燃料消費</td><td id="sumFuelUsed">0 トン</td></tr>
+<tr><td>備蓄燃料（残り）</td><td id="sumFuelStock">0 トン</td></tr>
+<tr><td>今月の船員</td><td id="sumCrew">救助 0 名／喪失 0 名</td></tr>
+<tr><td>故障・修理中の船</td><td id="sumBroken">0 隻</td></tr>
+<tr><td>残存輸送船</td><td id="sumFleet">0 隻</td></tr>
+<tr><td>累計輸送量</td><td id="sumTotal">0 トン</td></tr>
+</table>
+<p id="sumText"></p>
+<p class="fleetlist" id="sumFleetList"></p>
+<button class="bigbtn" id="nextMonthBtn">翌月へ進む</button>
+</div>
+</div>
+
+<!-- ======= final overlay ======= -->
+<div class="overlay" id="finalOverlay">
+<div class="sheet" id="finalSheet">
+<div class="kicker" id="finalKicker">1945年8月15日 ― 終戦</div>
+<h2 id="finalTitle">戦争は終わった</h2>
+<div class="end-big clear hidden" id="finalClearBig">完全達成</div>
+<p class="end-sub hidden" id="finalClearSub">全8か月 ― ノルマ完全達成</p>
+<div class="rank" id="finalRank">A</div>
+<div class="verdict" id="finalVerdict">輸送司令官としての評価</div>
+<table class="sumtable">
+<tr><td>累計輸送量</td><td id="finTotal">0 トン</td></tr>
+<tr><td>全期間ノルマ合計</td><td id="finQuota">0 トン</td></tr>
+<tr><td>ノルマ達成月</td><td id="finMonths">0 / 8 か月</td></tr>
+<tr><td>喪失した船</td><td id="finLost">0 隻</td></tr>
+<tr><td>生きて終戦を迎えた船</td><td id="finFleet">0 隻</td></tr>
+<tr><td>備蓄燃料（残り）</td><td id="finFuel">0 トン</td></tr>
+<tr><td>船員（沈没船の乗員）</td><td id="finCrew">―</td></tr>
+<tr><td>発生した故障</td><td id="finBroken">0 件</td></tr>
+<tr><td>君の船団の残存率（延べ隻数比）</td><td id="finSurvival">–</td></tr>
+<tr><td>史実の商船隊（総トン数）</td><td>開戦時 633.7万トン → 終戦時 220.7万トン（35%）</td></tr>
+</table>
+<p id="finalText"></p>
+<button class="bigbtn" id="restartBtn">もう一度、1945年1月から</button>
+</div>
+</div>
+
+<!-- ======= game over overlay ======= -->
+<div class="overlay" id="gameOverOverlay">
+<div class="sheet gameover-sheet">
+<div class="kicker" id="goKicker">輸送網崩壊 ― 1945年</div>
+<div class="end-big gameover">GAME OVER</div>
+<p class="end-sub">ゲームオーバー ― 海の命綱、断たれる</p>
+<h2 id="goTitle" style="text-align:center;">船は、もういない</h2>
+<p id="goText"></p>
+<table class="sumtable">
+<tr><td>崩壊した月</td><td id="goMonth">―</td></tr>
+<tr><td>ノルマを達成した月</td><td id="goMonths">0 / 8 か月</td></tr>
+<tr><td>ここまで届けた資源</td><td id="goTotal">0 トン</td></tr>
+<tr><td>全期間ノルマ合計</td><td id="goQuota">0 トン</td></tr>
+<tr><td>喪失した船</td><td id="goLost">0 隻</td></tr>
+<tr><td>残存輸送船</td><td>0 隻</td></tr>
+<tr><td>備蓄燃料（残り）</td><td id="goFuel">0 トン</td></tr>
+<tr><td>船員（沈没船の乗員）</td><td id="goCrew">―</td></tr>
+<tr><td>発生した故障</td><td id="goBroken">0 件</td></tr>
+</table>
+<p class="note" id="goNote"></p>
+<button class="bigbtn" id="gameOverRestartBtn">もう一度、1945年1月から挑む</button>
+</div>
+</div>
+
+<!-- ======= cheat (invincible) overlay ======= -->
+<div class="overlay" id="cheatOverlay">
+<div class="sheet cheat-sheet">
+<div class="kicker">裏コマンド ― 成功</div>
+<div class="cheat-stars" aria-hidden="true">★ ★ ★</div>
+<div class="cheat-code">↑ ↑ ↓ ↓ ← → ← → A B</div>
+<h2 id="cheatTitle">万歳モード 発動</h2>
+<p id="cheatText">極秘命令が受理された。全輸送船に特別防備が施され、<b>機雷・魚雷では沈まなくなる</b>。あわせて燃料の消費も帳簿から消える――<b>出航しても備蓄燃料は1トンも減らない</b>。そして軍楽隊は演奏を切り替える――<b>万歳モード中、BGMは海軍の公式行進曲「軍艦行進曲」になる</b>。もう一度同じコマンドを打てば、通常モードへ戻り、BGMも元の「月月火水木金金」に戻る。</p>
+<button class="bigbtn" id="cheatOkBtn">了解 ― この力で輸送を続ける</button>
+</div>
+</div>
+
+<!-- ======= breakdown overlay ======= -->
+<div class="overlay" id="breakdownOverlay">
+<div class="sheet breakdown-sheet">
+<div class="kicker">機関故障 ― 出港不可</div>
+<h2 id="breakTitle">故障船が発生した</h2>
+<p id="breakText"></p>
+<ul class="breaklist" id="breakList"></ul>
+<p class="break-avail" id="breakAvail"></p>
+<p class="note">故障した船は今月いっぱい修理に入り、出港できません。翌月には修理を終えて復帰します（ただし翌月あらためて故障判定があります）。</p>
+<button class="bigbtn" id="breakOkBtn">確認 ― 修理を手配する</button>
+</div>
+</div>
+
+<script>
+"use strict";
+/* ================= AUDIO : BGM & SFX (Web Audio synthesis, no files) ================= */
+function midiHz(m){ return 440*Math.pow(2,(m-69)/12); }
+/* 和声パーツ（軍艦行進曲用）：G／D／C／Em の三和音 */
+var CH_G=[55,59,62], CH_D=[50,54,57], CH_C=[48,52,55], CH_EM=[52,55,59];
+var AudioSys = {
+  ctx:null, master:null, bgmGain:null, sfxGain:null, noiseBuf:null,
+  bgmOn:true, sfxOn:true, volume:0.72,
+  bgmPlaying:false, timer:null, nextTime:0, beat:0, melIdx:0, nextMelBeat:0,
+  tempo:104, // BPM - 「月月火水木金金」の行進曲テンポ
+  gunkan:false, // true の間は BGM が「軍艦行進曲」に切り替わる（万歳モード連動）
+  init:function(){
+    if(this.ctx) { if(this.ctx.state==="suspended") this.ctx.resume(); return true; }
+    try{
+      var AC = window.AudioContext || window.webkitAudioContext;
+      if(!AC) return false;
+      this.ctx = new AC();
+      this.master = this.ctx.createGain(); this.master.gain.value = this.volume;
+      // gentle compressor to keep explosions from clipping
+      var comp = this.ctx.createDynamicsCompressor();
+      comp.threshold.value=-18; comp.knee.value=18; comp.ratio.value=6; comp.attack.value=0.003; comp.release.value=0.24;
+      this.master.connect(comp); comp.connect(this.ctx.destination);
+      this.bgmGain = this.ctx.createGain(); this.bgmGain.gain.value = 0.62; this.bgmGain.connect(this.master);
+      this.sfxGain = this.ctx.createGain(); this.sfxGain.gain.value = 0.95; this.sfxGain.connect(this.master);
+      // noise buffer (2s white noise) for drums / explosions / sea
+      var len = this.ctx.sampleRate*2, buf = this.ctx.createBuffer(1,len,this.ctx.sampleRate), d = buf.getChannelData(0);
+      for(var i=0;i<len;i++) d[i]=Math.random()*2-1;
+      this.noiseBuf = buf;
+      return true;
+    }catch(e){ return false; }
+  },
+  beatDur:function(){ return 60/(this.gunkan? this.gunkanTempo: this.tempo); },
+  // --- 通常時BGM：「月月火水木金金」（艦隊勤務／高橋俊策 作詞・江口夜詩 作曲、1940年・海軍省推薦曲）---
+  // 変ホ長調・行進曲。1940年の原盤（内田栄一・ヴォーカルフォア合唱団）と海軍軍楽隊の演奏録音から
+  // 主旋律を採譜・再構成したもの：Ebの反復からBbへ、G–Ab–Bbの上昇、F–Ebの終止、C–Eb'の頂点、
+  // そして歌詞の締め「月 月 火 水 木 金 金」をBbの反復→Ebで受ける構成を原曲どおりに追った。
+  // Melody: [midi|null, beats] / 16 bars x 4 beats
+  melody:[
+    /* 一番「朝だ夜明けだ 潮の息吹き」 */
+    [63,1],[63,1],[63,1],[63,1],[70,2],[70,2],
+    [67,1],[68,1],[70,2],[68,1],[65,1],[63,2],
+    /* 「うんと吸い込む あかがね色の」 */
+    [62,1],[63,1],[65,1],[67,1],[67,2],[70,2],
+    [70,1],[68,1],[70,1],[72,1],[75,4],
+    /* 「胸に若さの 漲る誇り」 */
+    [67,1],[68,1],[67,2],[65,1],[63,1],[63,2],
+    [63,1],[63,1],[65,1],[67,1],[67,2],[70,2],
+    /* 「海の男の 艦隊勤務」→ 締め「月 月 火 水 木 金 金」 */
+    [65,1],[63,1],[67,1],[67,1],[67,1],[68,1],[70,1],[68,1],
+    [68,2],[67,2],
+    [70,0.5],[70,0.5],[70,0.5],[70,0.5],[70,1],[63,1]
+  ],
+  chords:[ // per bar (4 beats): Eb Bb Eb Eb / Bb Eb Bb Eb / Eb Eb Eb Bb / Eb Ab Bb Eb
+    [51,55,58],[50,53,58],[51,55,58],[51,55,58],
+    [50,53,58],[51,55,58],[50,53,58],[51,55,58],
+    [51,55,58],[51,55,58],[51,55,58],[50,53,58],
+    [51,55,58],[44,48,51],[50,53,58],[51,55,58]
+  ],
+  bass:[39,34,39,39,34,39,34,39,39,39,39,34,39,44,34,39],
+  /* --- 軍艦行進曲（瀬戸口藤吉／パブリックドメイン）：明治43年刊の原譜（ト長調・2/4拍子・♩=114）をもとに転記。
+     主部「守るも攻むるも…」全36小節＋トリオ「海行かば」全48小節を、2拍＝1スロットとして通しでループさせる --- */
+  gunkanTempo:114,
+  gunkanMelody:[
+    [67,1],[69,1],
+    [67,0.5],[66,0.25],[67,0.25],[72,0.5],[76,0.5],
+    [74,0.5],[75,0.5],[76,0.5],[78,0.5],
+    [79,1],[null,1],
+    [62,0.75],[71,0.25],[71,0.5],[71,0.5],
+    [71,0.5],[72,0.5],[71,0.5],[69,0.5],
+    [69,0.75],[67,0.25],[69,0.75],[71,0.25],
+    [69,1],[null,1],
+    [62,0.75],[69,0.25],[69,0.5],[69,0.5],
+    [69,0.5],[71,0.5],[69,0.5],[67,0.5],
+    [67,0.75],[62,0.25],[67,0.75],[69,0.25],
+    [71,1],[null,1],
+    [62,0.75],[71,0.25],[71,0.5],[71,0.5],
+    [71,0.5],[72,0.5],[71,0.5],[69,0.5],
+    [69,0.75],[71,0.25],[74,0.5],[67,0.5],
+    [74,1],[null,1],
+    [74,0.75],[76,0.25],[79,0.5],[76,0.5],
+    [74,0.75],[76,0.25],[74,0.5],[71,0.5],
+    [69,0.5],[74,0.5],[69,0.5],[74,0.5],
+    [67,0.5],[null,0.5],[62,0.75],[62,0.25],
+    [74,1],[71,2],[69,0.75],[71,0.25],
+    [69,1],[67,1.5],[62,1],[64,0.5],
+    [67,2],
+    [67,1.5],[69,0.5],
+    [71,2.5],[null,0.5],[71,0.75],[72,0.25],
+    [74,1],[71,1],
+    [69,1.5],[67,0.5],
+    [64,2.5],[null,0.5],[62,0.75],[64,0.25],
+    [67,2],
+    [69,1.5],[71,0.5],
+    [67,2.5],[null,1.5],
+    /* トリオ ― 海行かば */
+    [64,2],[67,1],[67,1],[69,2],[67,1],[null,1],
+    [74,2],[71,2],[69,2],[67,1],[null,1],
+    [64,2],[67,2],[69,3],[null,1],
+    [74,3],[71,1],[69,2],[67,1],[null,1],
+    [69,2],[67,1],[71,1],[69,2],[67,1],[null,1],
+    [64,1],[64,1],[67,1],[67,1],[69,2],[67,1],[64,1],
+    [62,1],[62,1],[62,1],[60,1],[62,3],[null,1],
+    [72,2],[74,2],[69,2],[67,1],[69,1],
+    [72,3],[null,1],[74,3],[null,1],
+    [69,2],[67,1],[64,1],[67,2],[69,1],[67,1],
+    [64,2],[67,1],[67,1],[69,2],[67,1],[64,1],
+    [62,3],[null,1],[62,3],[null,1]
+  ],
+  gunkanChords:[
+    CH_G,CH_G,CH_D,CH_G, CH_G,CH_G,CH_D,CH_D, CH_G,CH_G,CH_G,CH_G, CH_G,CH_G,CH_D,CH_D,
+    CH_G,CH_G,CH_D,CH_G, CH_G,CH_G,CH_D,CH_G, CH_G,CH_G,CH_G,CH_G, CH_G,CH_D,CH_EM,CH_EM,
+    CH_G,CH_G,CH_G,CH_G,
+    CH_EM,CH_G,CH_D,CH_G, CH_G,CH_G,CH_D,CH_G, CH_EM,CH_G,CH_D,CH_D, CH_D,CH_G,CH_D,CH_G,
+    CH_D,CH_G,CH_D,CH_G, CH_EM,CH_G,CH_D,CH_G, CH_D,CH_C,CH_D,CH_D, CH_C,CH_G,CH_D,CH_G,
+    CH_C,CH_C,CH_D,CH_D, CH_D,CH_G,CH_G,CH_D, CH_EM,CH_G,CH_D,CH_G, CH_D,CH_D,CH_D,CH_D
+  ],
+  gunkanBass:[
+    43,43,38,43, 43,43,38,38, 43,43,43,43, 43,43,38,38,
+    43,43,38,43, 43,43,38,43, 43,43,43,43, 43,38,40,40,
+    43,43,43,43,
+    40,43,38,43, 43,43,38,43, 40,43,38,38, 38,43,38,43,
+    38,43,38,43, 40,43,38,43, 38,36,38,38, 36,43,38,43,
+    36,36,38,38, 38,43,43,38, 40,43,38,43, 38,38,38,38
+  ],
+  curMelody:function(){ return this.gunkan? this.gunkanMelody: this.melody; },
+  curChords:function(){ return this.gunkan? this.gunkanChords: this.chords; },
+  curBass:function(){ return this.gunkan? this.gunkanBass: this.bass; },
+  curBarBeats:function(){ return this.gunkan? 2: 4; },
+  setGunkan:function(on){
+    on = !!on;
+    if (this.gunkan === on) { updateAudioUI(); return; }
+    this.gunkan = on;
+    /* 曲の頭から切り替える（再生中ならスケジューラの位置をリセット） */
+    this.beat = 0; this.melIdx = 0; this.nextMelBeat = 0;
+    if (this.ctx && this.bgmPlaying) this.nextTime = this.ctx.currentTime + 0.06;
+    updateAudioUI();
+  },
+  playMelodyNote:function(midi,t,dur){
+    if(midi===null||!this.ctx) return;
+    var c=this.ctx, o1=c.createOscillator(), o2=c.createOscillator(), g=c.createGain(), f=c.createBiquadFilter();
+    o1.type="triangle"; o1.frequency.value=midiHz(midi);
+    o2.type="sine"; o2.frequency.value=midiHz(midi)*2;
+    f.type="lowpass"; f.frequency.value=this.gunkan? 2600: 1450; f.Q.value=0.6;
+    var og=c.createGain(); og.gain.value=0.22; // octave shimmer very quiet
+    g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(0.24,t+0.07);
+    g.gain.setValueAtTime(0.24,t+Math.max(0.08,dur-0.12)); g.gain.linearRampToValueAtTime(0.0001,t+dur);
+    o1.connect(f); o2.connect(og); og.connect(f); f.connect(g); g.connect(this.bgmGain);
+    o1.start(t); o2.start(t); o1.stop(t+dur+0.05); o2.stop(t+dur+0.05);
+    // soft brass-ish undertone
+    var o3=c.createOscillator(), g3=c.createGain(); o3.type="sawtooth"; o3.frequency.value=midiHz(midi-12);
+    var f3=c.createBiquadFilter(); f3.type="lowpass"; f3.frequency.value=this.gunkan? 980: 520;
+    g3.gain.setValueAtTime(0,t); g3.gain.linearRampToValueAtTime(this.gunkan? 0.085: 0.035,t+0.1); g3.gain.linearRampToValueAtTime(0.0001,t+dur);
+    o3.connect(f3); f3.connect(g3); g3.connect(this.bgmGain); o3.start(t); o3.stop(t+dur+0.05);
+  },
+  playChord:function(notes,t,dur){
+    if(!this.ctx) return; var c=this.ctx, self=this;
+    notes.forEach(function(m){
+      var o=c.createOscillator(), g=c.createGain(), f=c.createBiquadFilter();
+      o.type="triangle"; o.frequency.value=midiHz(m); f.type="lowpass"; f.frequency.value=900;
+      g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(0.055,t+0.35); g.gain.setValueAtTime(0.055,t+dur-0.4); g.gain.linearRampToValueAtTime(0.0001,t+dur);
+      o.connect(f); f.connect(g); g.connect(self.bgmGain); o.start(t); o.stop(t+dur+0.05);
+    });
+  },
+  playBass:function(midi,t,dur){
+    if(!this.ctx) return; var c=this.ctx, o=c.createOscillator(), g=c.createGain();
+    o.type="sine"; o.frequency.value=midiHz(midi);
+    g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(0.20,t+0.05); g.gain.exponentialRampToValueAtTime(0.001,t+dur);
+    o.connect(g); g.connect(this.bgmGain); o.start(t); o.stop(t+dur+0.05);
+  },
+  playMarchDrum:function(t,kind){
+    if(!this.ctx) return; var c=this.ctx;
+    if(kind==="bass"){
+      var o=c.createOscillator(), g=c.createGain(); o.type="sine"; o.frequency.setValueAtTime(92,t); o.frequency.exponentialRampToValueAtTime(48,t+0.16);
+      g.gain.setValueAtTime(0.14,t); g.gain.exponentialRampToValueAtTime(0.001,t+0.2); o.connect(g); g.connect(this.bgmGain); o.start(t); o.stop(t+0.22);
+    }else{
+      var s=c.createBufferSource(); s.buffer=this.noiseBuf; var f=c.createBiquadFilter(); f.type="bandpass"; f.frequency.value=1800; f.Q.value=0.8;
+      var g2=c.createGain(); g2.gain.setValueAtTime(0.045,t); g2.gain.exponentialRampToValueAtTime(0.001,t+0.11);
+      s.connect(f); f.connect(g2); g2.connect(this.bgmGain); s.start(t,Math.random()*1.2,0.14); s.stop(t+0.14);
+    }
+  },
+  schedule:function(){
+    if(!this.ctx||!this.bgmPlaying) return;
+    var ahead=0.55, bd=this.beatDur(), step=0.25; /* 0.25拍刻み：軍艦行進曲の16分音符まで正確に刻む（通常曲は整数拍のみなので影響なし） */
+    var mel=this.curMelody(), chs=this.curChords(), bss=this.curBass(), bb=this.curBarBeats();
+    while(this.nextTime < this.ctx.currentTime + ahead){
+      var t=this.nextTime, beatInBar=this.beat%bb, bar=Math.floor(this.beat/bb)%chs.length;
+      if(beatInBar===0){ this.playChord(chs[bar],t,bd*bb); this.playBass(bss[bar],t,bd*1.8); this.playMarchDrum(t,"bass"); }
+      if(bb===4 && beatInBar===2){ this.playBass(bss[bar]+7,t,bd*1.4); }
+      if(beatInBar===1||beatInBar===bb-1){ this.playMarchDrum(t,"snare"); }
+      if(this.beat>=this.nextMelBeat){
+        var item=mel[this.melIdx];
+        this.playMelodyNote(item[0],t,item[1]*bd*0.96);
+        this.nextMelBeat=this.beat+item[1];
+        this.melIdx=(this.melIdx+1)%mel.length;
+        if(this.melIdx===0){ this.nextMelBeat=this.beat+item[1]; /* loop seam handled by beat counter continuing */ }
+      }
+      this.beat+=step; this.nextTime+=bd*step;
+    }
+  },
+  startBGM:function(){
+    if(!this.init()) return;
+    if(this.ctx.state==="suspended") this.ctx.resume();
+    if(this.bgmPlaying||!this.bgmOn) { updateAudioUI(); return; }
+    this.bgmPlaying=true; this.beat=0; this.melIdx=0; this.nextMelBeat=0;
+    this.nextTime=this.ctx.currentTime+0.08;
+    var self=this; this.timer=setInterval(function(){ self.schedule(); },180);
+    this.schedule(); updateAudioUI();
+  },
+  stopBGM:function(){ this.bgmPlaying=false; if(this.timer){clearInterval(this.timer); this.timer=null;} updateAudioUI(); },
+  duck:function(){ if(!this.ctx||!this.bgmGain) return; var t=this.ctx.currentTime, g=this.bgmGain.gain; g.cancelScheduledValues(t); g.setValueAtTime(g.value,t); g.linearRampToValueAtTime(0.22,t+0.05); g.linearRampToValueAtTime(0.62,t+1.1); }
+};
+/* ---------- SFX ---------- */
+function sfxReady(){ if(!AudioSys.sfxOn) return false; if(!AudioSys.init()) return false; if(AudioSys.ctx.state==="suspended") AudioSys.ctx.resume(); return true; }
+function sfxWhistle(long){
+  if(!sfxReady()) return; var c=AudioSys.ctx, t=c.currentTime+0.02;
+  AudioSys.duck();
+  function blast(start,dur){
+    var g=c.createGain(), f=c.createBiquadFilter(); f.type="lowpass"; f.frequency.value=900;
+    g.gain.setValueAtTime(0,start); g.gain.linearRampToValueAtTime(0.34,start+0.18); g.gain.setValueAtTime(0.34,start+dur-0.18); g.gain.linearRampToValueAtTime(0.0001,start+dur);
+    [131,196,262].forEach(function(fr,i){ var o=c.createOscillator(); o.type=i===0?"sawtooth":"triangle"; o.frequency.setValueAtTime(fr*0.97,start); o.frequency.linearRampToValueAtTime(fr,start+0.15); var og=c.createGain(); og.gain.value=i===0?0.5:0.32; o.connect(og); og.connect(f); o.start(start); o.stop(start+dur+0.05); });
+    // breath noise
+    var s=c.createBufferSource(); s.buffer=AudioSys.noiseBuf; var nf=c.createBiquadFilter(); nf.type="bandpass"; nf.frequency.value=620; var ng=c.createGain(); ng.gain.value=0.05; s.connect(nf); nf.connect(ng); ng.connect(g); s.start(start); s.stop(start+dur);
+    f.connect(g); g.connect(AudioSys.sfxGain);
+  }
+  if(long){ blast(t,1.5); blast(t+1.85,0.75); blast(t+2.85,0.75); }
+  else { blast(t,0.9); }
+}
+function sfxExplosion(big){
+  if(!sfxReady()) return; var c=AudioSys.ctx, t=c.currentTime+0.01; AudioSys.duck();
+  var dur=big?1.9:1.35;
+  // pressure wave: sine drop
+  var o=c.createOscillator(), og=c.createGain(); o.type="sine"; o.frequency.setValueAtTime(big?150:130,t); o.frequency.exponentialRampToValueAtTime(28,t+dur*0.75);
+  og.gain.setValueAtTime(big?0.85:0.65,t); og.gain.exponentialRampToValueAtTime(0.001,t+dur); o.connect(og); og.connect(AudioSys.sfxGain); o.start(t); o.stop(t+dur+0.05);
+  // blast noise: lowpass sweep down
+  var s=c.createBufferSource(); s.buffer=AudioSys.noiseBuf; s.loop=true;
+  var f=c.createBiquadFilter(); f.type="lowpass"; f.frequency.setValueAtTime(3400,t); f.frequency.exponentialRampToValueAtTime(90,t+dur);
+  var g=c.createGain(); g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(big?0.9:0.7,t+0.045); g.gain.exponentialRampToValueAtTime(0.001,t+dur);
+  s.connect(f); f.connect(g); g.connect(AudioSys.sfxGain); s.start(t,Math.random()); s.stop(t+dur+0.05);
+  // water splash / debris tail
+  var s2=c.createBufferSource(); s2.buffer=AudioSys.noiseBuf; var f2=c.createBiquadFilter(); f2.type="bandpass"; f2.frequency.setValueAtTime(480,t+0.12); f2.frequency.linearRampToValueAtTime(180,t+dur);
+  var g2=c.createGain(); g2.gain.setValueAtTime(0,t+0.1); g2.gain.linearRampToValueAtTime(0.16,t+0.28); g2.gain.exponentialRampToValueAtTime(0.001,t+dur+0.25);
+  s2.connect(f2); f2.connect(g2); g2.connect(AudioSys.sfxGain); s2.start(t+0.1,Math.random()); s2.stop(t+dur+0.3);
+}
+function sfxSinking(){
+  if(!sfxReady()) return; var c=AudioSys.ctx, t=c.currentTime;
+  for(var i=0;i<7;i++){ (function(k){ var st=t+0.15+k*0.22, o=c.createOscillator(), g=c.createGain(); o.type="sine"; o.frequency.setValueAtTime(300-k*22+Math.random()*40,st); o.frequency.exponentialRampToValueAtTime(90,st+0.18); g.gain.setValueAtTime(0.07,st); g.gain.exponentialRampToValueAtTime(0.001,st+0.2); o.connect(g); g.connect(AudioSys.sfxGain); o.start(st); o.stop(st+0.22); })(i); }
+}
+function sfxPing(){
+  if(!sfxReady()) return; var c=AudioSys.ctx;
+  [0,0.55].forEach(function(off){ var t=c.currentTime+off, o=c.createOscillator(), g=c.createGain(); o.type="sine"; o.frequency.value=920; g.gain.setValueAtTime(0.16,t); g.gain.exponentialRampToValueAtTime(0.001,t+0.5); o.connect(g); g.connect(AudioSys.sfxGain); o.start(t); o.stop(t+0.55); });
+  // alarm klaxon, quiet and brief
+  var t2=c.currentTime+0.05, o2=c.createOscillator(), g2=c.createGain(), lfo=c.createOscillator(), lg=c.createGain();
+  o2.type="square"; o2.frequency.value=520; lfo.frequency.value=5.5; lg.gain.value=90; lfo.connect(lg); lg.connect(o2.frequency);
+  var f=c.createBiquadFilter(); f.type="lowpass"; f.frequency.value=1100;
+  g2.gain.setValueAtTime(0,t2); g2.gain.linearRampToValueAtTime(0.045,t2+0.08); g2.gain.setValueAtTime(0.045,t2+0.85); g2.gain.linearRampToValueAtTime(0,t2+1.0);
+  o2.connect(f); f.connect(g2); g2.connect(AudioSys.sfxGain); o2.start(t2); lfo.start(t2); o2.stop(t2+1.05); lfo.stop(t2+1.05);
+}
+function sfxEscape(){
+  if(!sfxReady()) return; var c=AudioSys.ctx, t=c.currentTime;
+  // rushing water / full-speed whoosh + relieved major lift
+  var s=c.createBufferSource(); s.buffer=AudioSys.noiseBuf; var f=c.createBiquadFilter(); f.type="bandpass"; f.frequency.setValueAtTime(300,t); f.frequency.linearRampToValueAtTime(1100,t+0.7);
+  var g=c.createGain(); g.gain.setValueAtTime(0.001,t); g.gain.exponentialRampToValueAtTime(0.14,t+0.15); g.gain.exponentialRampToValueAtTime(0.001,t+0.9); s.connect(f); f.connect(g); g.connect(AudioSys.sfxGain); s.start(t); s.stop(t+1);
+  [69,72,76].forEach(function(m,i){ var st=t+0.12+i*0.13, o=c.createOscillator(), og=c.createGain(); o.type="triangle"; o.frequency.value=midiHz(m); og.gain.setValueAtTime(0.12,st); og.gain.exponentialRampToValueAtTime(0.001,st+0.5); o.connect(og); og.connect(AudioSys.sfxGain); o.start(st); o.stop(st+0.55); });
+}
+function sfxArrival(){
+  if(!sfxReady()) return; sfxWhistle(false);
+  var c=AudioSys.ctx, t=c.currentTime+1.05;
+  // harbor bell: FM metallic ding x2
+  [0,0.42].forEach(function(off){ var st=t+off, car=c.createOscillator(), mod=c.createOscillator(), mg=c.createGain(), g=c.createGain(); car.type="sine"; car.frequency.value=1180; mod.frequency.value=1180*2.76; mg.gain.setValueAtTime(260,st); mg.gain.exponentialRampToValueAtTime(1,st+0.5); mod.connect(mg); mg.connect(car.frequency); g.gain.setValueAtTime(0.14,st); g.gain.exponentialRampToValueAtTime(0.001,st+0.55); car.connect(g); g.connect(AudioSys.sfxGain); car.start(st); mod.start(st); car.stop(st+0.6); mod.stop(st+0.6); });
+}
+function sfxJingle(ok){
+  if(!sfxReady()) return; var c=AudioSys.ctx, t=c.currentTime+0.05;
+  var seq = ok? [62,65,69,74] : [62,60,57,53];
+  seq.forEach(function(m,i){ var st=t+i*0.22, o=c.createOscillator(), g=c.createGain(), f=c.createBiquadFilter(); o.type="triangle"; o.frequency.value=midiHz(m); f.type="lowpass"; f.frequency.value=1500; g.gain.setValueAtTime(0.16,st); g.gain.exponentialRampToValueAtTime(0.001,st+(ok?0.55:0.7)); o.connect(f); f.connect(g); g.connect(AudioSys.sfxGain); o.start(st); o.stop(st+0.75); });
+}
+function sfxTorpedoLaunch(){
+  if(!sfxReady()) return; var c=AudioSys.ctx, t=c.currentTime;
+  var s=c.createBufferSource(); s.buffer=AudioSys.noiseBuf; var f=c.createBiquadFilter(); f.type="highpass"; f.frequency.setValueAtTime(500,t); f.frequency.linearRampToValueAtTime(2400,t+0.5);
+  var g=c.createGain(); g.gain.setValueAtTime(0.001,t); g.gain.exponentialRampToValueAtTime(0.13,t+0.08); g.gain.exponentialRampToValueAtTime(0.001,t+0.6); s.connect(f); f.connect(g); g.connect(AudioSys.sfxGain); s.start(t); s.stop(t+0.65);
+}
+function sfxClick(){ if(!sfxReady()) return; var c=AudioSys.ctx, t=c.currentTime, o=c.createOscillator(), g=c.createGain(); o.type="sine"; o.frequency.value=740; g.gain.setValueAtTime(0.06,t); g.gain.exponentialRampToValueAtTime(0.001,t+0.07); o.connect(g); g.connect(AudioSys.sfxGain); o.start(t); o.stop(t+0.08); }
+function updateAudioUI(){
+  var b=document.getElementById("bgmToggle"), s=document.getElementById("sfxToggle");
+  if(b){ b.setAttribute("aria-pressed", AudioSys.bgmOn?"true":"false"); b.classList.toggle("off",!AudioSys.bgmOn); document.getElementById("bgmToggleLabel").textContent = AudioSys.bgmOn? (AudioSys.gunkan? "BGM オン ― 軍艦行進曲":"BGM オン ― 月月火水木金金"):"BGM オフ"; }
+  if(s){ s.setAttribute("aria-pressed", AudioSys.sfxOn?"true":"false"); s.classList.toggle("off",!AudioSys.sfxOn); document.getElementById("sfxToggleLabel").textContent = AudioSys.sfxOn? "効果音 オン":"効果音 オフ"; }
+  var np=document.getElementById("nowPlaying");
+  if(np) np.innerHTML = !AudioSys.bgmOn? 'BGMは停止中です ― 「BGM オン」で軍楽隊の演奏を再開できます'
+    : AudioSys.gunkan? '演奏中： <b>「軍艦行進曲」</b> ― 瀬戸口藤吉／海軍公式行進曲（★万歳モード専用・自動ループ）'
+    : '演奏中： <b>「月月火水木金金」</b> ― 高橋俊策 作詞／江口夜詩 作曲・海軍軍歌（自動ループ）';
+}
+/* ================= data ================= */
+/* 損耗率・ノルマ・補充は史料ベースで調整（出典はページ末尾に明記）。
+   史実の1945年：商船＋タンカーの損耗は1〜8月で約154万トン、建造は約56万トン（損耗は建造の約2.7倍）。
+   商船隊は開戦時633.7万総トン → 終戦時220.7万総トン（35%）。3月末の「飢餓作戦」で機雷戦が激化し、
+   6月には米潜水艦が日本海へ侵入。終盤ほど1隻あたり損耗率が跳ね上がるよう月別に傾斜を付けた。 */
+var MONTHS = [
+{ m:1, days:31, quota:5000, mine:0.05, sub:0.02, reinforce:0,
+intel:"史料が示す1945年の収支――この年、日本の商船・タンカーは<b>8か月で約154万トン</b>失われ、建造は<b>約56万トン</b>しかなかった。損耗は建造の約2.7倍だ。まだ機雷は散発的で、潜水艦の影も薄い。今のうちに運べ。<b>ノルマは 5,000トン</b>。標準的な運航なら1隻あたり損耗は約1割で済む時期だ。"},
+{ m:2, days:28, quota:5500, mine:0.06, sub:0.04, reinforce:3,
+intel:"B-29の夜間出撃が増え、機雷原は静かに広がっている。朝鮮近海で潜水艦の潜望鏡を見たとの報告も入り始めた。<b>ノルマは 5,500トン（前月比 +500）</b>。日数は28日しかない。徴用船3隻が加わるが、史実でも建造が損耗に追いついた月はなかった。"},
+{ m:3, days:31, quota:7000, mine:0.11, sub:0.07, reinforce:3,
+intel:"<b>3月27日、B-29による大規模な機雷封鎖――「飢餓作戦」が始まった。</b>ここから触雷の危険は跳ね上がる。史実でも1945年の損耗を押し上げた主因は、この機雷戦だった。<b>ノルマは 7,000トン（前月比 +1,500）</b>。1隻あたり損耗率は2割近くに達し始める。"},
+{ m:4, days:30, quota:8000, mine:0.15, sub:0.11, reinforce:2,
+intel:"機雷原は両港の沖にまで広がり、潜水艦の哨戒も日本海中央部へ進出した。造船は損耗に追いつかず、<b>今月から補充は月2隻に細る</b>――史実の1945年、建造量は損耗量の半分にも届かなかった。<b>ノルマは 8,000トン（前月比 +1,000）</b>。"},
+{ m:5, days:31, quota:9000, mine:0.19, sub:0.15, reinforce:2,
+intel:"護衛の航空機はほとんど飛べなくなった。船団は自力で生き延びるしかない。標準的な運航でも<b>4隻に1隻は帰ってこない</b>計算になってきた。<b>ノルマは 9,000トン（前月比 +1,000）</b>。届ける量は増えるのに、届く割合は減っていく――賽の河原のような輸送戦だ。"},
+{ m:6, days:30, quota:10000, mine:0.23, sub:0.24, reinforce:2,
+intel:"<b>6月、米潜水艦隊が対馬・津軽の封鎖を抜け、日本海へ侵入した（バーニー作戦）。</b>「内海だから安全」という前提は崩れた。発見率はここから一段と跳ね上がる。<b>ノルマは 10,000トン（前月比 +1,000）</b>。1隻あたり損耗率は3割を超える。"},
+{ m:7, days:31, quota:11000, mine:0.27, sub:0.30, reinforce:1,
+intel:"本土決戦の準備で資源需要は極限に達した。だが海は最も危険な季節を迎え、<b>補充は月1隻まで細った</b>。失う速度に建造はまるで追いつかない――史実の収支そのままだ。<b>ノルマは 11,000トン（前月比 +1,000）――全期間で最も重い。</b>標準的な運航では、ほぼ3隻に1隻が沈む。"},
+{ m:8, days:15, quota:5500, mine:0.30, sub:0.34, reinforce:1,
+intel:"戦争の終わりが近いという噂が港に流れる。だが命令は命令だ。<b>8月15日まで</b>船は走り続けなければならない。史実では、開戦時<b>633.7万総トン</b>あった日本の商船隊は終戦時<b>220.7万総トン――35%</b>にまで減っていた。大型の優秀船から沈んでいった末の数字だ。期間は半月、<b>ノルマは 5,500トン</b>。1隻あたり損耗率は4割に達する、最後の踏ん張りだ。"}
+];
+/* 燃料配給（トン）と故障率（1隻・判定1回あたり）の月別設定。
+   燃料：1月の900トンは月初の備蓄。以後は月ごとに配給が届くが、末期ほど細る。
+   故障率：老朽化と部品不足で、戦争末期に連れて 5% → 22% へ増えていく。 */
+var MONTH_FUEL = [900, 520, 500, 480, 460, 440, 420, 220];
+var MONTH_BREAK = [0.05, 0.06, 0.08, 0.10, 0.12, 0.15, 0.18, 0.22];
+MONTHS.forEach(function(mo, i){ mo.fuel = MONTH_FUEL[i]; mo.breakRate = MONTH_BREAK[i]; });
+var ROUTES = {
+direct: { days:3, mineMod: 0.04, detectMod: 0.18, escapeMod: 0.22, fuelPerShip:42},
+standard: { days:4, mineMod: 0.01, detectMod: 0.00, escapeMod: 0.00, fuelPerShip:30},
+detour: { days:6, mineMod:-0.03, detectMod:-0.08, escapeMod:-0.12, fuelPerShip:39}
+};
+var FLEETS = {
+"1": { detectMod:-0.18, lossRate:0.15, escapeMod: 0.16},
+"2": { detectMod:-0.14, lossRate:0.18, escapeMod: 0.12},
+"3": { detectMod:-0.10, lossRate:0.20, escapeMod: 0.08},
+"5": { detectMod: 0.00, lossRate:0.40, escapeMod: 0.00},
+"8": { detectMod: 0.14, lossRate:0.25, escapeMod:-0.08}
+};
+var TIMES = {
+day: { detectMod: 0.14, escapeMod: 0.14, dayMul:0.75},
+night: { detectMod:-0.14, escapeMod:-0.08, dayMul:1.35}
+};
+var SHIP_NAMES = ["朝潮丸","金星丸","豊国丸","日進丸","瑞穂丸","千歳丸","阿蘇丸","高砂丸","松島丸","羽黒丸","妙高丸","那智丸","足柄丸","摩耶丸","鳥海丸","利根丸","筑摩丸","鈴谷丸","熊野丸","最上丸","三隈丸","青葉丸","衣笠丸","加古丸","古鷹丸","夕張丸","天龍丸","龍田丸","北上丸","大井丸","白馬丸","玄海丸","対馬丸","壱岐丸","佐渡丸","隠岐丸","能登丸","越後丸","加賀丸","若狭丸","丹後丸"];
+var CARGO = 1000;
+var CREW_PER_SHIP = 28; /* 輸送船1隻の乗員数 */
+
+/* ================= state ================= */
+var S;
+function newGame(){
+S = {
+monthIdx:0, day:1, fleet:[], lostTotal:0, deliveredTotal:0,
+monthDelivered:0, monthLost:0, monthVoyages:0,
+fuel: MONTH_FUEL[0], broken:[], breakdownsTotal:0,
+crewRescuedTotal:0, crewLostTotal:0,
+monthFuelUsed:0, monthCrewRescued:0, monthCrewLost:0,
+invincible:false,
+pendingBreak:null, breakCloseCb:null,
+results:[], nameIdx:0, sailing:false, over:false
+};
+for (var i=0;i<16;i++) S.fleet.push(nextName());
+}
+function nextName(){
+var n = SHIP_NAMES[S.nameIdx % SHIP_NAMES.length];
+var cycle = Math.floor(S.nameIdx / SHIP_NAMES.length);
+S.nameIdx++;
+return cycle>0? n+"（代船"+(cycle+1)+"）": n;
+}
+function month(){ return MONTHS[S.monthIdx];}
+function clamp(v,a,b){ return Math.max(a, Math.min(b, v));}
+function availShips(){ return S.fleet.filter(function(n){ return S.broken.indexOf(n)<0;});}
+function availCount(){ return availShips().length;}
+/* 故障判定：候補の各船が今月の故障率で故障し、修理中リストに入る。新規故障船名の配列を返す */
+function rollBreakdowns(candidates){
+var newly = [];
+var rate = month().breakRate;
+candidates.forEach(function(name){
+if (S.broken.indexOf(name)>=0) return;
+if (Math.random() < rate){ S.broken.push(name); newly.push(name); S.breakdownsTotal++; }
+});
+if (newly.length) log("整備点検 ― "+newly.join("、")+" に機関故障が判明した。出港不可となり、ドックで修理に入る。（今月の故障率 "+Math.round(rate*100)+"%）","bad");
+return newly;
+}
+/* 故障ポップアップ通知 */
+function showBreakdownPopup(list, context, onClose){
+if (!list || !list.length){ if (onClose) onClose(); return; }
+S.breakCloseCb = onClose || null;
+document.getElementById("breakTitle").textContent = "故障船 "+list.length+"隻 ― 出港不可";
+document.getElementById("breakText").textContent = context+"で、"+list.length+"隻に機関故障が判明した。戦争末期の今、老朽化と部品不足のため故障は増える一方だ（今月の故障率 "+Math.round(month().breakRate*100)+"%）。下記の船は修理が終わるまで出港できない。";
+var ul = document.getElementById("breakList");
+ul.innerHTML = "";
+list.forEach(function(n){
+var li = document.createElement("li");
+li.textContent = n+" ― 機関故障のため修理中（今月は出港不可）";
+ul.appendChild(li);
+});
+var av = availCount();
+document.getElementById("breakAvail").textContent = "現在の出航可能な船： "+av+" 隻（保有 "+S.fleet.length+" 隻／故障・修理中 "+S.broken.length+" 隻）。"
++ (av>0? "残りの船で船団を組み直せば、出航は続けられる。": "出航可能な船が1隻も残っていない。今月は輸送を終了し、翌月の修理完了を待つしかない。");
+document.getElementById("breakdownOverlay").classList.add("show");
+sfxPing();
+}
+
+/* ================= selection ================= */
+var sel = { route:"standard", fleet:"5", time:"night"};
+function bindOpts(id, key, cb){
+var box = document.getElementById(id);
+var btns = box.querySelectorAll(".opt");
+for (var i=0;i<btns.length;i++){
+btns[i].addEventListener("click", function(){
+if (S && S.sailing) return;
+sel[key] = this.getAttribute("data-"+key) || this.getAttribute("data-route") || this.getAttribute("data-fleet") || this.getAttribute("data-time");
+if(AudioSys.ctx) sfxClick();
+refreshOpts(); if(cb) cb();
+});
+}
+}
+function refreshOpts(){
+var avail = S? availCount(): 0;
+if (S && avail>0 && parseInt(sel.fleet,10) > avail){
+var sizes = [1,2,3,5,8];
+for (var si=sizes.length-1; si>=0; si--){
+if (sizes[si] <= avail){ sel.fleet = String(sizes[si]); break;}
+}
+}
+markSel("routeOpts","route",sel.route);
+markSel("fleetOpts","fleet",sel.fleet);
+markSel("timeOpts","time",sel.time);
+var fbtns = document.getElementById("fleetOpts").querySelectorAll(".opt");
+for (var i=0;i<fbtns.length;i++){
+var need = parseInt(fbtns[i].getAttribute("data-fleet"),10);
+fbtns[i].disabled = need > avail;
+}
+document.getElementById("fleetHint").textContent = "保有 "+S.fleet.length+" 隻／出航可能 "+avail+" 隻"
++ (S.broken.length? "（故障 "+S.broken.length+" 隻は修理中・出港不可）": "")
++ (avail>0 && avail<=2? "（少数精鋭で出航可）": "");
+updateForecast();
+}
+function markSel(boxId, attr, val){
+var btns = document.getElementById(boxId).querySelectorAll(".opt");
+for (var i=0;i<btns.length;i++){
+var v = btns[i].getAttribute("data-"+attr);
+if (v===String(val)) btns[i].classList.add("sel"); else btns[i].classList.remove("sel");
+}
+}
+
+/* ================= forecast math ================= */
+function calc(){
+var mo = month(), r = ROUTES[sel.route], f = FLEETS[sel.fleet], t = TIMES[sel.time];
+var days = Math.max(2, Math.round(r.days * t.dayMul));
+var mine = clamp(mo.mine + r.mineMod + (days>=6? 0.03: 0), 0.02, 0.45);
+var detect = clamp(0.32 + mo.sub + r.detectMod + f.detectMod + t.detectMod, 0.05, 0.92);
+var escape = clamp(0.45 + r.escapeMod + f.escapeMod + t.escapeMod, 0.05, 0.95);
+var n = parseInt(sel.fleet,10);
+var surviveMine = 1 - mine;
+var pArrivePerShip = surviveMine * (1 - detect*(1-escape)*f.lossRate);
+var expArrive = n * pArrivePerShip;
+/* 燃料：最短は高速航行、遠回りは距離の分だけ、標準より消費が大きい */
+var fuelPerShip = r.fuelPerShip;
+var fuelNeeded = fuelPerShip * n;
+var inv = !!(S && S.invincible);
+if (inv){
+  /* 万歳モード：触雷・被雷では沈まない（全船必ず到着）／燃料は消費しない */
+  mine = 0; fuelNeeded = 0;
+  surviveMine = 1;
+  pArrivePerShip = 1;
+  expArrive = n;
+}
+/* 乗員救助率の目安：月を追うごとに下がり、昼間は上がり、夜間と沖合の遠回りでは下がる */
+var rescueRate = clamp(0.45 - S.monthIdx*0.02 + (sel.time==="day"? 0.08: -0.03) + (sel.route==="detour"? -0.07: sel.route==="direct"? 0.03: 0), 0.15, 0.65);
+return { days:days, mine:mine, detect:detect, escape:escape, lossRate: inv? 0: f.lossRate, invincible:inv,
+n:n, expArrive:expArrive, expCargo: Math.round(expArrive*CARGO), loss: 1 - pArrivePerShip,
+fuelPerShip: inv? 0: fuelPerShip, fuelNeeded:fuelNeeded, rescueRate:rescueRate, breakRate: mo.breakRate};
+}
+function pct(v){ return Math.round(v*100)+"%";}
+function updateForecast(){
+if (!S || S.over) return;
+var c = calc();
+document.getElementById("fbMine").style.width = (c.mine*100)+"%";
+document.getElementById("fbDetect").style.width = (c.detect*100)+"%";
+document.getElementById("fbEscape").style.width = (c.escape*100)+"%";
+document.getElementById("fvMine").textContent = pct(c.mine);
+document.getElementById("fvDetect").textContent = pct(c.detect);
+document.getElementById("fvEscape").textContent = pct(c.escape);
+document.getElementById("fbLoss").style.width = (c.loss*100)+"%";
+document.getElementById("fvLoss").textContent = pct(c.loss);
+document.getElementById("fbBreak").style.width = (c.breakRate*100)+"%";
+document.getElementById("fvBreak").textContent = pct(c.breakRate);
+document.getElementById("fvDays").innerHTML = c.days + " <small>日</small>";
+document.getElementById("fvArrive").innerHTML = c.expArrive.toFixed(1) + " <small>/ "+c.n+" 隻</small>";
+document.getElementById("fvCargo").innerHTML = c.expCargo.toLocaleString() + " <small>トン</small>";
+if (c.invincible){
+document.getElementById("fvFuel").innerHTML = "0 <small>トン（★万歳モード ― 燃料消費なし／備蓄 "+S.fuel.toLocaleString()+"トンは減らない）</small>";
+document.getElementById("fvRescue").innerHTML = "― <small>（万歳モード ― 沈没しないため救助不要）</small>";
+} else {
+document.getElementById("fvFuel").innerHTML = c.fuelNeeded.toLocaleString() + " <small>トン（1隻 "+c.fuelPerShip+"トン／出航後 残 "+Math.max(0, S.fuel - c.fuelNeeded).toLocaleString()+"トン）</small>";
+document.getElementById("fvRescue").innerHTML = pct(c.rescueRate) + " <small>（乗員"+CREW_PER_SHIP+"名／隻）</small>";
+}
+var avail = availCount();
+document.getElementById("fvAvail").innerHTML = avail + " <small>/ 保有 "+S.fleet.length+" 隻</small>";
+document.getElementById("routeDaysHint").textContent = "所要 "+c.days+" 日";
+var left = mo_daysLeft();
+var noFuel = c.fuelNeeded > S.fuel;
+var noShip = avail < c.n;
+document.getElementById("departBtn").disabled = S.sailing || c.days > left || noShip || noFuel;
+document.getElementById("departBtn").textContent = avail===0? "出航可能な船がない ― 全船修理中"
+: noFuel? "燃料不足 ― 出航不可"
+: c.days > left? "日数不足 ― 出航不可": "出 航 命 令";
+}
+function mo_daysLeft(){ return month().days - S.day + 1;}
+
+/* ================= HUD ================= */
+function renderHUD(){
+var mo = month();
+document.getElementById("dateLabel").textContent = "1945年 "+mo.m+"月 "+Math.min(S.day, mo.days)+"日";
+document.getElementById("daysLeft").textContent = mo_daysLeft();
+document.getElementById("fleetCount").textContent = S.fleet.length;
+document.getElementById("brokenCount").textContent = S.broken.length;
+document.getElementById("fuelStock").textContent = S.fuel.toLocaleString();
+document.getElementById("fuelChip").classList.toggle("danger", S.fuel < 150 && !S.invincible);
+var invChip = document.getElementById("invincibleChip");
+if (invChip) invChip.classList.toggle("hidden", !S.invincible);
+document.getElementById("crewRescued").textContent = S.crewRescuedTotal.toLocaleString();
+document.getElementById("crewLost").textContent = S.crewLostTotal.toLocaleString();
+document.getElementById("totalDelivered").textContent = S.deliveredTotal.toLocaleString();
+document.getElementById("totalLost").textContent = S.lostTotal;
+document.getElementById("monthDelivered").textContent = S.monthDelivered.toLocaleString();
+document.getElementById("monthQuota").textContent = mo.quota.toLocaleString();
+var bar = document.getElementById("quotaBar");
+var p = clamp(S.monthDelivered / mo.quota * 100, 0, 100);
+bar.querySelector("i").style.width = p+"%";
+if (S.monthDelivered >= mo.quota) bar.classList.add("over"); else bar.classList.remove("over");
+var prevQuota = S.monthIdx>0? MONTHS[S.monthIdx-1].quota: null;
+var nextMo = S.monthIdx < MONTHS.length-1? MONTHS[S.monthIdx+1]: null;
+var escNote = (prevQuota===null? ""
+: mo.m===8? " 期間は前月の半分（15日間）しかないのに <b>"+mo.quota.toLocaleString()+"トン</b>。しかも損耗率は全期間で最悪――1日あたりの厳しさでは前月を上回る。"
+: " 前月（"+prevQuota.toLocaleString()+"トン）から <b>+"+(mo.quota-prevQuota).toLocaleString()+"トン</b> の引き上げ。")
++ (nextMo? " 来月はさらに <b>"+nextMo.quota.toLocaleString()+"トン</b>"+(nextMo.m===8? "（15日間）": "")+"まで上がる。": "");
+document.getElementById("quotaNote").innerHTML = (S.monthDelivered >= mo.quota
+? "今月のノルマは達成した。だが船と日数が残るなら、来月の逼迫に備えて運んでおく手もある。欲をかくか、安全を取るか。"
+: "輸送船1隻の積載量は1,000トン。到着した船の数だけ資源が届く。あと <b>"+(mo.quota - S.monthDelivered).toLocaleString()+"トン</b> 必要だ。")
++ escNote;
+document.getElementById("intelBox").innerHTML = "<b></b>"+mo.intel
++ (S.invincible
+? "<br><b>★ 万歳モード発動中</b> ― 触雷・魚雷では沈まず、全船が必ず到着する。出航しても<b>備蓄燃料は消費されない</b>。故障判定だけは通常どおり行われる。軍楽隊は<b>「軍艦行進曲」</b>を演奏中だ。"
+: "<br><b>燃料・整備・救助情勢</b> ― 備蓄燃料は <b>"+S.fuel.toLocaleString()+"トン</b>（来月の配給はさらに細る）。今月の故障率は <b>"+pct(mo.breakRate)+"</b>。沈没時の乗員救助率は、現在の選択でおよそ <b>"+pct(calc().rescueRate)+"</b> が目安だ。");
+var track = document.getElementById("monthTrack");
+track.innerHTML = "";
+MONTHS.forEach(function(mm, i){
+var d = document.createElement("div");
+d.className = "mt" + (i===S.monthIdx? " now":"") + (S.results[i]==="ok"? " ok":"") + (S.results[i]==="ng"? " ng":"");
+d.innerHTML = "";
+var line1 = document.createElement("span");
+line1.textContent = mm.m+"月" + (S.results[i]==="ok"? " 達成": S.results[i]==="ng"? " 未達": "");
+var line2 = document.createElement("span");
+line2.className = "mq";
+line2.textContent = mm.quota.toLocaleString()+"トン" + (mm.m===8? "／15日": "");
+d.appendChild(line1); d.appendChild(line2);
+track.appendChild(d);
+});
+refreshOpts();
+document.getElementById("endMonthBtn").disabled = S.sailing;
+}
+
+/* ================= log ================= */
+function log(text, cls){
+var box = document.getElementById("logBox");
+var e = document.createElement("div");
+e.className = "e " + (cls||"");
+var mo = month();
+e.innerHTML = '<span class="d">'+mo.m+"月"+S.day+"日</span><span class=\"m\"></span>";
+e.querySelector(".m").textContent = text;
+box.appendChild(e);
+box.scrollTop = box.scrollHeight;
+}
+
+/* ================= map fx ================= */
+(function drawMines(){
+var g = document.getElementById("mineGroup");
+var zones = [ {x:152,y:364,r:15,n:6}, {x:428,y:286,r:17,n:7}, {x:188,y:392,r:11,n:5}];
+var s = "";
+zones.forEach(function(z){
+for (var i=0;i<z.n;i++){
+var a = (i/z.n)*Math.PI*2 + z.x;
+var rr = z.r * (0.35 + ((i*37)%60)/100);
+var x = (z.x + Math.cos(a)*rr).toFixed(1), y = (z.y + Math.sin(a)*rr).toFixed(1);
+s += '<path d="M'+(x-4)+' '+y+' L'+(+x+4)+' '+y+' M'+x+' '+(y-4)+' L'+x+' '+(+y+4)+'"/>';
+}
+});
+g.innerHTML = s;
+})();
+function highlightRoute(){
+["direct","standard","detour"].forEach(function(k){
+var p = document.getElementById("route-"+k);
+if (k===sel.route){ p.setAttribute("stroke","var(--accent)"); p.setAttribute("stroke-width","3"); p.setAttribute("opacity","0.95");}
+else { p.setAttribute("stroke","var(--ink2)"); p.setAttribute("stroke-width","2"); p.setAttribute("opacity","0.4");}
+});
+}
+function explosion(x, y, color){
+var fx = document.getElementById("fxLayer");
+var pts = [];
+for (var i=0;i<10;i++){
+var a = i/10*Math.PI*2, r = i%2? 6: 15;
+pts.push((x+Math.cos(a)*r).toFixed(1)+","+(y+Math.sin(a)*r).toFixed(1));
+}
+var el = document.createElementNS("http://www.w3.org/2000/svg","polygon");
+el.setAttribute("points", pts.join(" "));
+el.setAttribute("fill", color || "var(--bad)");
+el.setAttribute("opacity","0.95");
+fx.appendChild(el);
+setTimeout(function(){ el.setAttribute("opacity","0.35");}, 500);
+setTimeout(function(){ if(el.parentNode) el.parentNode.removeChild(el);}, 2600);
+}
+
+/* ================= voyage ================= */
+function depart(){
+if (S.sailing || S.over) return;
+var c = calc();
+if (c.days > mo_daysLeft() || availCount() < c.n || c.fuelNeeded > S.fuel) return;
+var ships = availShips().slice(0, c.n);
+var routeName = {direct:"最短航路", standard:"標準航路", detour:"遠回り航路"}[sel.route];
+var timeName = sel.time==="day"? "昼間": "夜間";
+S.fuel -= c.fuelNeeded; S.monthFuelUsed += c.fuelNeeded;
+log("第"+(S.monthVoyages+1)+"船団 出航。"+routeName+"／"+timeName+"運航／"+c.n+"隻（"+ships.join("、")+"）。釜山で資源を積み、新潟を目指す。","head");
+if (c.invincible){
+log("★ 万歳モード ― 特別防備により機雷・魚雷では沈まない。燃料消費もなし（備蓄燃料 "+S.fuel.toLocaleString()+"トンはそのまま）。","good");
+} else {
+log("燃料消費 ― "+routeName+"は1隻 "+c.fuelPerShip+"トン、今回の出航で計 "+c.fuelNeeded+"トンを消費。備蓄燃料は残り "+S.fuel.toLocaleString()+"トン。"+(sel.route==="direct"? "高速航行は速いが、燃料を食う。": sel.route==="detour"? "遠回りは距離の分だけ燃料を食う。": ""),"sys");
+}
+renderHUD();
+sfxWhistle(true);
+setStatus("汽笛が鳴り、船団は日本海を航行中……", true);
+
+/* --- resolve outcome --- */
+var mineSunk = [], survivors = [];
+ships.forEach(function(name){
+if (Math.random() < c.mine) mineSunk.push(name); else survivors.push(name);
+});
+var detected = Math.random() < c.detect;
+var escaped = detected && Math.random() < c.escape;
+var combatSunk = [];
+if (detected &&!escaped){
+var after = [];
+survivors.forEach(function(name){
+if (Math.random() < c.lossRate) combatSunk.push(name); else after.push(name);
+});
+survivors = after;
+}
+var arrived = survivors;
+
+/* --- crew rescue per sunk ship --- */
+var crewByShip = {};
+mineSunk.concat(combatSunk).forEach(function(name){
+var rr = clamp(c.rescueRate + (Math.random()*0.3 - 0.15), 0.05, 0.85);
+var rescued = Math.round(CREW_PER_SHIP * rr);
+crewByShip[name] = { rescued: rescued, lost: CREW_PER_SHIP - rescued };
+});
+
+/* --- build event timeline --- */
+var events = [];
+mineSunk.forEach(function(name, i){
+events.push({ at: 0.14 + Math.random()*0.62, type:"mine", name:name, idx: ships.indexOf(name), rescued: crewByShip[name].rescued, lost: crewByShip[name].lost});
+});
+if (detected){
+events.push({ at:0.52, type:"detect"});
+if (escaped) events.push({ at:0.66, type:"escape"});
+else if (c.invincible) {
+events.push({ at:0.64, type:"attack"});
+events.push({ at:0.74, type:"invincibleHit"});
+} else {
+events.push({ at:0.64, type:"attack"});
+combatSunk.forEach(function(name){
+events.push({ at: 0.68 + Math.random()*0.18, type:"combat", name:name, idx: ships.indexOf(name), rescued: crewByShip[name].rescued, lost: crewByShip[name].lost});
+});
+}
+}
+events.sort(function(a,b){ return a.at-b.at;});
+
+animateVoyage(c, ships, events, function(){
+/* --- apply results --- */
+var sunkSet = {};
+mineSunk.concat(combatSunk).forEach(function(n){ sunkSet[n]=true;});
+S.fleet = S.fleet.filter(function(n){ return!sunkSet[n];});
+var gain = arrived.length * CARGO;
+S.monthDelivered += gain; S.deliveredTotal += gain;
+var lost = mineSunk.length + combatSunk.length;
+S.monthLost += lost; S.lostTotal += lost;
+var rescuedSum = 0, lostCrewSum = 0;
+mineSunk.concat(combatSunk).forEach(function(n){ var cb = crewByShip[n]; if (cb){ rescuedSum += cb.rescued; lostCrewSum += cb.lost; }});
+S.crewRescuedTotal += rescuedSum; S.crewLostTotal += lostCrewSum;
+S.monthCrewRescued += rescuedSum; S.monthCrewLost += lostCrewSum;
+S.monthVoyages++;
+S.day += c.days;
+if (arrived.length>0){ log("船団帰港。"+arrived.length+"隻が新潟に到着、資源 "+gain.toLocaleString()+"トンを揚陸した。", "good"); sfxArrival(); }
+else { log("船団は帰ってこなかった。資源は届かなかった。", "bad"); sfxSinking(); }
+if (lost>0) log("乗員救助の集計 ― 沈没した "+lost+" 隻の乗員 "+(lost*CREW_PER_SHIP)+" 名のうち、"+rescuedSum+" 名を救助した。"+lostCrewSum+" 名が海に残った。", rescuedSum>0? "sys": "bad");
+setStatus(lost===0? "船団は無事に帰港した。": "帰港。"+lost+"隻が海に残った。", false);
+renderHUD();
+if (S.fleet.length===0){ endGameEarly(); return;}
+if (S.fleet.length<=2) log("残存船は "+S.fleet.length+" 隻のみ。だが輸送は止めない――少数精鋭船団（"+S.fleet.length+"隻編成）で出航できる。","sys");
+/* 帰港した船の整備点検 ― 故障した船は翌月まで出港できない */
+var newlyBroken = rollBreakdowns(arrived.slice());
+renderHUD();
+var monthEnding = mo_daysLeft() < 2;
+if (monthEnding) log(month().m+"月の残り日数では、もう出航できない。","sys");
+if (newlyBroken.length){
+showBreakdownPopup(newlyBroken, "帰港後の整備点検", monthEnding? function(){ finishMonth(); }: null);
+} else if (monthEnding){ finishMonth(); }
+});
+}
+
+function animateVoyage(c, ships, events, done){
+S.sailing = true; renderHUD();
+highlightRoute();
+var path = document.getElementById("route-"+sel.route);
+var L = path.getTotalLength();
+var layer = document.getElementById("convoyLayer");
+layer.innerHTML = "";
+var dots = [];
+var NS = "http://www.w3.org/2000/svg";
+ships.forEach(function(name, i){
+var g = document.createElementNS(NS,"g");
+var hull = document.createElementNS(NS,"path");
+hull.setAttribute("d","M-7,0 L4,-3.4 L8,0 L4,3.4 Z");
+hull.setAttribute("fill","var(--ink)");
+hull.setAttribute("stroke","var(--paper)"); hull.setAttribute("stroke-width","0.8");
+g.appendChild(hull); layer.appendChild(g);
+dots.push({ g:g, sunk:false});
+});
+var dur = 2600 + c.days*420;
+var start = null, evIdx = 0;
+function frame(ts){
+if (!start) start = ts;
+var p = Math.min(1, (ts-start)/dur);
+var headDist = p * L;
+dots.forEach(function(d, i){
+if (d.sunk) return;
+var dist = clamp(headDist - i*16, 0, L);
+var pt = path.getPointAtLength(dist);
+var pt2 = path.getPointAtLength(clamp(dist+2,0,L));
+var ang = Math.atan2(pt2.y-pt.y, pt2.x-pt.x)*180/Math.PI;
+d.g.setAttribute("transform","translate("+pt.x+","+pt.y+") rotate("+ang+")");
+d.pt = pt;
+});
+while (evIdx < events.length && events[evIdx].at <= p){
+fireEvent(events[evIdx], dots, ships, path);
+evIdx++;
+}
+if (p < 1) requestAnimationFrame(frame);
+else {
+setTimeout(function(){
+layer.innerHTML = "";
+S.sailing = false;
+done();
+}, 450);
+}
+}
+requestAnimationFrame(frame);
+}
+function fireEvent(ev, dots, ships, path){
+if (ev.type==="mine"){
+var d = dots[ev.idx];
+if (d){ explosion(d.pt?d.pt.x:0, d.pt?d.pt.y:0); d.sunk = true; d.g.setAttribute("opacity","0");}
+sfxExplosion(false); setTimeout(sfxSinking, 650);
+log("触雷 ― "+ev.name+" が機雷に触れ、沈んでいった。積荷もろとも海の底だ。乗員"+CREW_PER_SHIP+"名のうち "+ev.rescued+" 名を救助、"+ev.lost+" 名が行方不明となった。","bad");
+setStatus("触雷！ "+ev.name+" を失った……", true);
+} else if (ev.type==="detect"){
+sfxPing();
+log("敵潜水艦に発見された！ 潜望鏡が船団を追っている。","bad");
+setStatus("敵潜水艦に発見された！", true);
+} else if (ev.type==="escape"){
+sfxEscape();
+log("全速で振り切った。敵潜は諦め、海中に姿を消した。","good");
+setStatus("逃げ切った！ 新潟へ急ぐ。", true);
+} else if (ev.type==="attack"){
+sfxTorpedoLaunch();
+log("魚雷発射 ― 船団は攻撃を受けている！","bad");
+setStatus("魚雷攻撃を受けている！", true);
+} else if (ev.type==="invincibleHit"){
+sfxExplosion(true);
+log("魚雷が命中――だが沈まない！ 特別防備が船体を守り、船団は傷を負いながらも航行を続けた。★万歳モード","good");
+setStatus("被雷したが沈まない！ 万歳モードが船を守っている。", true);
+} else if (ev.type==="combat"){
+var d2 = dots[ev.idx];
+if (d2){ explosion(d2.pt?d2.pt.x:0, d2.pt?d2.pt.y:0); d2.sunk = true; d2.g.setAttribute("opacity","0");}
+sfxExplosion(true); setTimeout(sfxSinking, 700);
+log("被雷 ― "+ev.name+" が魚雷を受け、沈没した。乗員"+CREW_PER_SHIP+"名のうち "+ev.rescued+" 名を救助、"+ev.lost+" 名が行方不明となった。","bad");
+}
+}
+function setStatus(text, sailing){
+document.getElementById("voyageStatusText").textContent = text;
+var vs = document.getElementById("voyageStatus");
+if (sailing) vs.classList.add("sailing"); else vs.classList.remove("sailing");
+}
+
+/* ================= 裏コマンド：万歳モード（↑↑↓↓←→←→AB） ================= */
+var CHEAT_SEQ = ["U","U","D","D","L","R","L","R","A","B"];
+var cheatIdx = 0;
+function cheatFeed(sym){
+  if (sym === CHEAT_SEQ[cheatIdx]){ cheatIdx++; }
+  else { cheatIdx = (sym === CHEAT_SEQ[0])? 1: 0; }
+  if (cheatIdx >= CHEAT_SEQ.length){
+    cheatIdx = 0;
+    toggleInvincible();
+  }
+}
+function toggleInvincible(){
+  if (!S) return;
+  S.invincible = !S.invincible;
+  AudioSys.setGunkan(S.invincible);
+  renderHUD();
+  var title = document.getElementById("cheatTitle");
+  var text = document.getElementById("cheatText");
+  var btn = document.getElementById("cheatOkBtn");
+  if (S.invincible){
+    title.textContent = "万歳モード 発動";
+    text.innerHTML = "極秘命令が受理された。全輸送船に特別防備が施され、<b>機雷・魚雷では沈まなくなる</b>。あわせて燃料の消費も帳簿から消える――<b>出航しても備蓄燃料は1トンも減らない</b>。画面上部の「★ 万歳モード 発動中」チップが目印だ。そして軍楽隊の演奏も切り替わった――<b>万歳モード中、BGMは海軍の公式行進曲「軍艦行進曲」（瀬戸口藤吉）になる</b>。もう一度同じコマンド（↑↑↓↓←→←→AB）を打てば、通常モードへ戻り、BGMも元の「月月火水木金金」に戻る。";
+    btn.textContent = "了解 ― この力で輸送を続ける";
+    log("裏コマンド成功 ― ★万歳モード発動。船は沈まず、燃料も消費されなくなった。BGMは「軍艦行進曲」に切り替わった。","good");
+    setStatus("★ 万歳モード発動 ― 船は沈まず、燃料も減らない。", S.sailing);
+  } else {
+    title.textContent = "万歳モード 解除";
+    text.innerHTML = "裏コマンドが再入力され、特別防備は解かれた。<b>次回の出航から、通常どおり触雷・被雷で沈み、燃料も消費される</b>。BGMも「軍艦行進曲」から、海軍軍歌「月月火水木金金」へ戻る。1945年の日本海の厳しさが戻ってくる。";
+    btn.textContent = "了解 ― 通常モードで続ける";
+    log("裏コマンド再入力 ― 万歳モードは解除された。通常の損耗と燃料消費に戻り、BGMも「月月火水木金金」に戻った。","sys");
+    setStatus("万歳モード解除 ― 通常モードに戻った。", S.sailing);
+  }
+  document.getElementById("cheatOverlay").classList.add("show");
+  sfxJingle(true);
+  if (S.invincible) setTimeout(function(){ sfxWhistle(false); }, 500);
+}
+document.addEventListener("keydown", function(e){
+  if (e.metaKey || e.ctrlKey || e.altKey) return;
+  var tag = (e.target && e.target.tagName) || "";
+  if (tag==="INPUT" || tag==="TEXTAREA" || tag==="SELECT") return;
+  var sym = null;
+  if (e.key==="ArrowUp") sym="U";
+  else if (e.key==="ArrowDown") sym="D";
+  else if (e.key==="ArrowLeft") sym="L";
+  else if (e.key==="ArrowRight") sym="R";
+  else if (e.key && e.key.toLowerCase()==="a") sym="A";
+  else if (e.key && e.key.toLowerCase()==="b") sym="B";
+  if (!sym) return;
+  if (sym==="U"||sym==="D"||sym==="L"||sym==="R") e.preventDefault();
+  cheatFeed(sym);
+});
+/* スマホ向け：スワイプで矢印、ボタン以外の場所へのタップ2回で A→B として同じコマンドを入力できる */
+(function(){
+  var sx=0, sy=0, st=0;
+  document.addEventListener("touchstart", function(e){
+    if (!e.changedTouches || !e.changedTouches.length) return;
+    var t=e.changedTouches[0]; sx=t.clientX; sy=t.clientY; st=Date.now();
+  }, {passive:true});
+  document.addEventListener("touchend", function(e){
+    if (!e.changedTouches || !e.changedTouches.length) return;
+    var t=e.changedTouches[0];
+    var dx=t.clientX-sx, dy=t.clientY-sy;
+    var adx=Math.abs(dx), ady=Math.abs(dy);
+    var target=e.target;
+    var onControl = target && target.closest && target.closest("button,select,input,a,label,.opt");
+    if (Math.max(adx,ady) >= 28){
+      var sym = adx>ady? (dx>0? "R":"L") : (dy>0? "D":"U");
+      cheatFeed(sym);
+    } else if (!onControl && Date.now()-st < 350){
+      /* A・B の代替：空いた場所へのタップを順に A、B として数える（矢印まで進んでいる時だけ） */
+      if (cheatIdx===8) cheatFeed("A");
+      else if (cheatIdx===9) cheatFeed("B");
+    }
+  }, {passive:true});
+})();
+
+/* ================= month flow ================= */
+function finishMonth(){
+if (S.over) return;
+var mo = month();
+var ok = S.monthDelivered >= mo.quota;
+S.results[S.monthIdx] = ok? "ok": "ng";
+document.getElementById("sumKicker").textContent = "月次報告 ― 1945年"+mo.m+"月";
+document.getElementById("sumTitle").textContent = mo.m+"月の輸送、終了";
+var v = document.getElementById("sumVerdict");
+v.textContent = ok? "判 定 ― ノルマ達成": "判 定 ― ノルマ未達";
+v.style.color = ok? "var(--good)": "var(--bad)";
+v.style.borderColor = ok? "var(--good)": "var(--bad)";
+document.getElementById("sumDelivered").textContent = S.monthDelivered.toLocaleString()+" トン";
+document.getElementById("sumQuota").textContent = mo.quota.toLocaleString()+" トン";
+document.getElementById("sumLost").textContent = S.monthLost+" 隻";
+document.getElementById("sumFuelUsed").textContent = S.monthFuelUsed.toLocaleString()+" トン";
+document.getElementById("sumFuelStock").textContent = S.fuel.toLocaleString()+" トン";
+document.getElementById("sumCrew").textContent = "救助 "+S.monthCrewRescued+" 名／喪失 "+S.monthCrewLost+" 名";
+document.getElementById("sumBroken").textContent = S.broken.length+" 隻（翌月に修理完了・復帰）";
+document.getElementById("sumFleet").textContent = S.fleet.length+" 隻";
+document.getElementById("sumTotal").textContent = S.deliveredTotal.toLocaleString()+" トン";
+var isLast = S.monthIdx === MONTHS.length-1;
+var nextReinforce = isLast? 0: MONTHS[S.monthIdx+1].reinforce;
+document.getElementById("sumText").textContent =
+(ok? "本土の工場は今月も動き続け、配給も途切れなかった。届いた資源の向こうで、多くの暮らしが繋ぎ止められている。"
+: "届かなかった資源のぶん、工場の煙は細り、配給は減らされた。海の向こうで何隻が沈んだか、本土の人々は知らない。")
++ " 今月は燃料 "+S.monthFuelUsed.toLocaleString()+"トンを消費し、備蓄は "+S.fuel.toLocaleString()+"トン残った。"
++ (S.monthCrewLost>0 || S.monthCrewRescued>0? " 沈没船の乗員は "+S.monthCrewRescued+" 名を救助し、"+S.monthCrewLost+" 名を失った。": "")
++ (S.broken.length? " "+S.broken.length+" 隻が故障で修理中だが、翌月には復帰する。": "")
++ (isLast? "": " 翌月に向けて徴用船 "+nextReinforce+" 隻が新たに編入される予定だ。"
++ (MONTHS[S.monthIdx+1].m===8
+? " だが最後の月も容赦はない――8月は15日間だけで "+MONTHS[S.monthIdx+1].quota.toLocaleString()+"トン。1日あたりに直せば全期間で最も厳しいノルマだ。"
+: " だがノルマも上がる――翌月は "+MONTHS[S.monthIdx+1].quota.toLocaleString()+"トン（今月から +"+(MONTHS[S.monthIdx+1].quota-mo.quota).toLocaleString()+"トン）だ。"));
+document.getElementById("sumFleetList").textContent = "残存船："+(S.fleet.length? S.fleet.map(function(n){ return S.broken.indexOf(n)>=0? n+"（故障・修理中）": n;}).join("、"): "なし");
+document.getElementById("nextMonthBtn").textContent = isLast? "終戦を迎える": (mo.m+1)+"月へ進む";
+document.getElementById("monthOverlay").classList.add("show");
+sfxJingle(ok);
+renderHUD();
+}
+function nextMonth(){
+document.getElementById("monthOverlay").classList.remove("show");
+if (S.monthIdx === MONTHS.length-1){ finalScreen(); return;}
+S.monthIdx++; S.day = 1; S.monthDelivered = 0; S.monthLost = 0; S.monthVoyages = 0;
+S.monthFuelUsed = 0; S.monthCrewRescued = 0; S.monthCrewLost = 0;
+var repairedShips = S.broken.slice(); S.broken = [];
+if (repairedShips.length) log(repairedShips.join("、")+" の修理が完了し、船団に復帰した。","good");
+S.fuel += month().fuel;
+log(month().m+"月の燃料配給 "+month().fuel.toLocaleString()+"トンを受領した。備蓄燃料は "+S.fuel.toLocaleString()+"トンになった。","sys");
+var r = month().reinforce;
+var added = [];
+for (var i=0;i<r;i++){ var n = nextName(); S.fleet.push(n); added.push(n);}
+if (S.fleet.length < 2){
+var em = 2 - S.fleet.length;
+for (var j=0;j<em;j++){ var n2 = nextName(); S.fleet.push(n2); added.push(n2);}
+log("残存船が尽きかけ、漁船まで徴用して "+added.join("、")+" を緊急編入した。もはや選べる船はない。","sys");
+} else if (added.length){
+log(month().m+"月。徴用船 "+added.join("、")+" が船団に加わった。","sys");
+}
+var prevQ = MONTHS[S.monthIdx-1].quota;
+if (month().m===8){
+log("―― 1945年8月。今月のノルマは "+month().quota.toLocaleString()+"トン。期間は15日間だけ、損耗率は全期間で最悪――実質では全期間で最も厳しい月だ。","head");
+} else {
+log("―― 1945年"+month().m+"月。今月のノルマは "+month().quota.toLocaleString()+"トン（前月 "+prevQ.toLocaleString()+"トンから +"+(month().quota-prevQ).toLocaleString()+"トンの引き上げ）。","head");
+}
+var newlyBrokenM = rollBreakdowns(S.fleet.slice());
+setStatus("港で出航命令を待っている。", false);
+renderHUD();
+if (newlyBrokenM.length) showBreakdownPopup(newlyBrokenM, month().m+"月 月初整備点検");
+}
+function endGameEarly(){
+S.over = true;
+log("保有輸送船はすべて失われた。日本海の輸送網は、ここに崩壊した。","bad");
+setStatus("輸送船 0隻 ― 輸送網は崩壊した。", false);
+renderHUD();
+var totalQuotaGO = MONTHS.reduce(function(a,m){return a+m.quota;},0);
+var okCountGO = S.results.filter(function(r){return r==="ok";}).length;
+/* 今月分は月次判定前でも、ノルマ到達済みなら達成として数える */
+var countedMonths = okCountGO + ((S.results[S.monthIdx]===undefined && S.monthDelivered >= month().quota)? 1: 0);
+document.getElementById("goKicker").textContent = "輸送網崩壊 ― 1945年"+month().m+"月";
+document.getElementById("goTitle").textContent = month().m+"月 ― 最後の船が沈んだ";
+document.getElementById("goText").textContent =
+"ゲームオーバー。保有輸送船が0隻となり、新潟―釜山の航路はここで途絶えた。"
++"釜山の岸壁には、まだ運ばれるはずだった資源が積み残されている。だが、それを積んで日本海を渡る船は、もう一隻も残っていない。"
++"本土の工場へ、食卓へと続いていた細い命綱は、"+month().m+"月の海に断ち切られた。"
++"終戦の日を、この航路が見ることはない。";
+document.getElementById("goMonth").textContent = "1945年"+month().m+"月（"+S.monthIdx+1+"か月目）";
+document.getElementById("goMonths").textContent = countedMonths+" / 8 か月";
+document.getElementById("goTotal").textContent = S.deliveredTotal.toLocaleString()+" トン";
+document.getElementById("goQuota").textContent = totalQuotaGO.toLocaleString()+" トン";
+document.getElementById("goLost").textContent = S.lostTotal+" 隻";
+document.getElementById("goFuel").textContent = S.fuel.toLocaleString()+" トン";
+var goCrewTot = S.crewRescuedTotal + S.crewLostTotal;
+document.getElementById("goCrew").textContent = goCrewTot>0? "救助 "+S.crewRescuedTotal+" 名／喪失 "+S.crewLostTotal+" 名（救助率 "+Math.round(S.crewRescuedTotal/goCrewTot*100)+"%）": "乗員喪失 0 名";
+document.getElementById("goBroken").textContent = S.breakdownsTotal+" 件";
+document.getElementById("goNote").textContent =
+"それでも、ここまで届けた "+S.deliveredTotal.toLocaleString()+"トンの資源は、確かに誰かの暮らしを繋いだ。"
++"沈んだ船と乗組員の名は、戦況日誌の中に残る。―― 輸送は終わった。だが記録は、ここに残る。";
+document.getElementById("gameOverOverlay").classList.add("show");
+sfxJingle(false); sfxExplosion(true);
+}
+function finalScreen(early){
+S.over = true;
+var totalQuota = MONTHS.reduce(function(a,m){return a+m.quota;},0);
+var okCount = S.results.filter(function(r){return r==="ok";}).length;
+var perfect = !early && okCount>=MONTHS.length;
+var rank, verdict, text;
+var kickerEl = document.getElementById("finalKicker");
+var titleEl = document.getElementById("finalTitle");
+var sheetEl = document.getElementById("finalSheet");
+var clearBig = document.getElementById("finalClearBig");
+var clearSub = document.getElementById("finalClearSub");
+if (sheetEl) sheetEl.classList.toggle("clear-sheet", perfect);
+if (clearBig) clearBig.classList.toggle("hidden", !perfect);
+if (clearSub) clearSub.classList.toggle("hidden", !perfect);
+if (kickerEl) kickerEl.textContent = "1945年8月15日 ― 終戦";
+if (titleEl) titleEl.textContent = "戦争は終わった";
+if (perfect){
+if (kickerEl) kickerEl.textContent = "1945年8月15日 ― 終戦 ／ 全期間ノルマ完全達成";
+if (titleEl) titleEl.textContent = "命綱は、最後まで途切れなかった";
+rank="S"; verdict="全8か月ノルマ完全達成 ― 完全クリア";
+text="完全達成だ。1945年1月から8月15日まで、8か月すべてで輸送ノルマを果たし続けた。"
++"機雷原は広がり、潜水艦は日本海の真ん中にまで入り込み、月を追うごとに船は沈み、ノルマは重くなった。"
++"それでも君は、航路を読み、船団の規模を絞り、昼と夜を使い分け、最後の1隻まで海へ送り続けた。"
++"届けられた "+S.deliveredTotal.toLocaleString()+"トンの資源は、本土の工場を動かし、配給を繋ぎ、数え切れない暮らしの最後の支えになった。"
++"戦争は終わった。だがこの航路が止まらなかったことも、また一つの事実として残る。―― 輸送司令官、君の任務は完了した。よくぞ、最後まで届け切った。";
+} else if (early){
+if (kickerEl) kickerEl.textContent = "1945年8月15日 ― 終戦";
+if (titleEl) titleEl.textContent = "戦争は終わった";
+rank = "D"; verdict = "輸送網は崩壊した";
+text = month().m+"月にして全船を失った。だが累計 "+S.deliveredTotal.toLocaleString()+"トンの資源は、確かに本土へ届いた。その重さを、歴史は静かに記録するだろう。";
+} else if (okCount>=7 && S.fleet.length>=6){
+rank="S"; verdict="伝説の輸送司令官";
+text="ほぼ全ての月のノルマを果たし、多くの船を生かして終戦を迎えた。1945年の日本海で、これ以上の戦果は望めなかっただろう。届けられた資源は、数え切れない暮らしの最後の命綱になった。";
+} else if (okCount>=5){
+rank="A"; verdict="優秀な輸送司令官";
+text="厳しい機雷と潜水艦の海を、確かな判断で渡り切った。失った船は少なくないが、本土への命綱は最後まで途切れなかった。";
+} else if (okCount>=3){
+rank="B"; verdict="持ちこたえた司令官";
+text="届いた月もあれば、届かなかった月もある。それでも輸送は止まらなかった。沈んだ船の乗組員たちの分まで、この航路は走り続けた。";
+} else if (okCount>=1){
+rank="C"; verdict="苦闘の記録";
+text="ノルマに届かない月が続いた。機雷原と潜水艦の前に、輸送網は幾度も千切れかけた。それでも、届いた資源は確かに誰かを生かした。";
+} else {
+rank="D"; verdict="海は、あまりに広く冷たかった";
+text="一度もノルマを果たせなかった。だがこの海で船を出すこと自体が、すでに賭けだった。沈んだ船と乗組員の名は、日誌の中にだけ残る。";
+}
+document.getElementById("finalRank").textContent = rank;
+document.getElementById("finalVerdict").textContent = verdict;
+document.getElementById("finTotal").textContent = S.deliveredTotal.toLocaleString()+" トン";
+document.getElementById("finQuota").textContent = totalQuota.toLocaleString()+" トン";
+document.getElementById("finMonths").textContent = okCount+" / 8 か月";
+document.getElementById("finLost").textContent = S.lostTotal+" 隻";
+document.getElementById("finFleet").textContent = S.fleet.length+" 隻";
+document.getElementById("finFuel").textContent = S.fuel.toLocaleString()+" トン";
+var finCrewTot = S.crewRescuedTotal + S.crewLostTotal;
+document.getElementById("finCrew").textContent = finCrewTot>0? "救助 "+S.crewRescuedTotal+" 名／喪失 "+S.crewLostTotal+" 名（救助率 "+Math.round(S.crewRescuedTotal/finCrewTot*100)+"%）": "沈没船なし ― 乗員喪失 0 名";
+document.getElementById("finBroken").textContent = S.breakdownsTotal+" 件";
+var everFielded = S.lostTotal + S.fleet.length;
+document.getElementById("finSurvival").textContent = everFielded>0? Math.round(S.fleet.length/everFielded*100)+"%（延べ "+everFielded+" 隻中 "+S.fleet.length+" 隻）": "–";
+document.getElementById("finalText").textContent = text + (perfect
+? " 8月15日正午、終戦の放送が流れる。新潟の港では、生き残った船たちが静かに汽笛を鳴らした。これからは、資源ではなく人々と平和な荷を運ぶ日々が、この海に戻ってくる。"
+: early
+? ""
+: " 1945年8月15日、戦争は終わる。残った船は静かな港に戻り、日本海には再び、資源ではなく人々を運ぶ船が行き交う日が来る.");
+document.getElementById("finalOverlay").classList.add("show");
+sfxJingle(!early && okCount>=3); if(perfect){ setTimeout(function(){ sfxWhistle(false); },650); }
+}
+
+/* ================= wire up ================= */
+function startGame(){
+newGame();
+AudioSys.setGunkan(false);
+document.getElementById("logBox").innerHTML = "";
+document.getElementById("fxLayer").innerHTML = "";
+document.getElementById("convoyLayer").innerHTML = "";
+document.getElementById("gameOverOverlay").classList.remove("show");
+document.getElementById("monthOverlay").classList.remove("show");
+document.getElementById("finalOverlay").classList.remove("show");
+document.getElementById("breakdownOverlay").classList.remove("show");
+document.getElementById("cheatOverlay").classList.remove("show");
+cheatIdx = 0;
+document.getElementById("nextMonthBtn").onclick = null;
+log("1945年1月。輸送司令官に着任。保有輸送船16隻。今月のノルマは 5,000トン。","head");
+log("釜山には本土が待つ資源が積み上がっている。問題は、その間の海だ。","sys");
+sel = { route:"standard", fleet:"5", time:"night"};
+var startBroken = rollBreakdowns(S.fleet.slice());
+S.pendingBreak = startBroken.length? startBroken: null;
+setStatus("港で出航命令を待っている。", false);
+highlightRoute();
+renderHUD();
+if (S.pendingBreak && !document.getElementById("introOverlay").classList.contains("show")){
+var pb0 = S.pendingBreak; S.pendingBreak = null;
+showBreakdownPopup(pb0, "着任時 整備点検");
+}
+}
+document.getElementById("bgmToggle").addEventListener("click", function(){
+AudioSys.bgmOn = !AudioSys.bgmOn;
+if(AudioSys.bgmOn){ AudioSys.startBGM(); } else { AudioSys.stopBGM(); }
+updateAudioUI();
+});
+document.getElementById("sfxToggle").addEventListener("click", function(){
+AudioSys.sfxOn = !AudioSys.sfxOn; updateAudioUI(); if(AudioSys.sfxOn) sfxClick();
+});
+document.getElementById("volSlider").addEventListener("input", function(){
+var v = parseInt(this.value,10); AudioSys.volume = v/100;
+document.getElementById("volVal").textContent = v+"%";
+if(AudioSys.master) AudioSys.master.gain.value = AudioSys.volume;
+if(AudioSys.init && !AudioSys.ctx) { /* not yet started */ }
+});
+document.getElementById("startBtn").addEventListener("click", function(){
+document.getElementById("introOverlay").classList.remove("show");
+AudioSys.init(); AudioSys.startBGM(); sfxWhistle(false);
+if (S && S.pendingBreak){ var pb = S.pendingBreak; S.pendingBreak = null; showBreakdownPopup(pb, "着任時 整備点検"); }
+});
+document.getElementById("cheatOkBtn").addEventListener("click", function(){
+document.getElementById("cheatOverlay").classList.remove("show");
+});
+document.getElementById("breakOkBtn").addEventListener("click", function(){
+document.getElementById("breakdownOverlay").classList.remove("show");
+var cb = S? S.breakCloseCb: null;
+if (S) S.breakCloseCb = null;
+if (cb) cb();
+});
+document.getElementById("departBtn").addEventListener("click", depart);
+document.getElementById("endMonthBtn").addEventListener("click", function(){
+if (S.sailing || S.over) return;
+log(month().m+"月の輸送を終了した。残り日数は翌月へ持ち越せない。","sys");
+finishMonth();
+});
+document.getElementById("nextMonthBtn").addEventListener("click", function(){
+if (S.over) return;
+nextMonth();
+});
+document.getElementById("restartBtn").addEventListener("click", function(){
+document.getElementById("finalOverlay").classList.remove("show");
+document.getElementById("nextMonthBtn").onclick = null;
+startGame();
+});
+document.getElementById("gameOverRestartBtn").addEventListener("click", function(){
+document.getElementById("gameOverOverlay").classList.remove("show");
+startGame();
+});
+["routeOpts","fleetOpts","timeOpts"].forEach(function(id){
+document.getElementById(id).addEventListener("click", function(){ setTimeout(highlightRoute, 0);});
+});
+bindOpts("routeOpts","route"); bindOpts("fleetOpts","fleet"); bindOpts("timeOpts","time");
+startGame();
+updateAudioUI();
+</script>
+</body>
+</html>
